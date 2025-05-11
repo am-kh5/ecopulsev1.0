@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react"; // Changed import type React to import React
+import React, { useState, useEffect } from "react"; 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -9,13 +9,13 @@ import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { CalendarIcon, Download, Filter, FileText, Lightbulb, BarChartBig, Loader2, Info, PieChart as PieChartIcon, Zap, Car, RecycleIcon, Building } from "lucide-react"; // Added PieChartIcon
+import { CalendarIcon, Download, Filter, FileText, Lightbulb, Loader2, Info, PieChart as PieChartIcon, Zap, Car, Recycle as RecycleIcon, Building } from "lucide-react"; 
 import { format, subDays, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import { generateComprehensiveReport, type GenerateComprehensiveReportInput, type GenerateComprehensiveReportOutput } from '@/ai/flows/generate-comprehensive-report';
 import { useToast } from "@/hooks/use-toast";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip as RechartsTooltip, Legend as RechartsLegend } from 'recharts';
-import { ChartContainer, ChartTooltipContent, ChartLegend as ChartLegendComponent } from '@/components/ui/chart'; // Renamed ChartLegend to ChartLegendComponent
+import { ChartContainer, ChartTooltipContent, ChartLegend as ChartLegendComponent } from '@/components/ui/chart'; 
 import type { ChartConfig } from '@/components/ui/chart';
 
 interface ReportEntry {
@@ -40,13 +40,12 @@ const allReportData: ReportEntry[] = [
 
 const reportCategories = ["All Categories", "Carbon Footprint", "Water Usage", "Electricity", "Waste Management"];
 
-// Define colors for the pie chart, similar to dashboard
 const PIE_CHART_COLORS = [
-  "hsl(var(--chart-1))", // Teal
-  "hsl(var(--chart-2))", // Orange
-  "hsl(var(--chart-4))", // Blue
-  "hsl(var(--chart-5))", // Green (original was yellow/orange, adjusted for variety)
-  "hsl(var(--primary))", // Primary Teal
+  "hsl(var(--chart-1))", 
+  "hsl(var(--chart-2))", 
+  "hsl(var(--chart-4))", 
+  "hsl(var(--chart-5))", 
+  "hsl(var(--primary))", 
 ];
 
 const getIconForSource = (sourceName: string): React.ElementType => {
@@ -54,13 +53,13 @@ const getIconForSource = (sourceName: string): React.ElementType => {
   if (sourceName.toLowerCase().includes("travel")) return Car;
   if (sourceName.toLowerCase().includes("waste")) return RecycleIcon;
   if (sourceName.toLowerCase().includes("operation")) return Building;
-  return PieChartIcon; // Default icon
+  return PieChartIcon; 
 };
 
 export default function ReportsPage() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
     const to = endOfMonth(new Date());
-    const from = startOfMonth(subMonths(new Date(), 5)); // Last 6 months including current
+    const from = startOfMonth(subMonths(new Date(), 5)); 
     return { from, to };
   });
   const [category, setCategory] = useState<string>("All Categories");
@@ -88,7 +87,6 @@ export default function ReportsPage() {
     setGeneratedReport(null);
 
     const companyDataInput: GenerateComprehensiveReportInput = {
-      // Using placeholder data similar to prediction form defaults
       companyName: "EcoCorp Inc.",
       energyConsumption: 29000,
       travelDistance: 8750,
@@ -110,7 +108,7 @@ export default function ReportsPage() {
       console.error("Report generation failed:", error);
       toast({
         title: "Report Generation Failed",
-        description: "Could not generate the report. Please try again.",
+        description: (error as Error)?.message || "Could not generate the report. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -119,7 +117,7 @@ export default function ReportsPage() {
   };
   
   const emissionSourceChartConfig = React.useMemo(() => {
-    if (!generatedReport?.carbonEmissionBreakdown.sourceData) return {} as ChartConfig;
+    if (!generatedReport?.carbonEmissionBreakdown?.sourceData) return {} as ChartConfig;
     
     const config: ChartConfig = {};
     generatedReport.carbonEmissionBreakdown.sourceData.forEach((item, index) => {
@@ -178,119 +176,138 @@ export default function ReportsPage() {
           <CardHeader>
             <CardTitle className="text-xl md:text-2xl text-primary">{generatedReport.reportTitle}</CardTitle>
             <CardDescription>
-              Generated on: {format(new Date(generatedReport.generatedDate), "MMMM dd, yyyy")} | Period Covered: {generatedReport.periodCovered}
+              Generated on: {format(new Date(generatedReport.generatedDate || Date.now()), "MMMM dd, yyyy")} | Period Covered: {generatedReport.periodCovered}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <section>
-              <h3 className="text-lg font-semibold mb-2 text-foreground">Executive Summary</h3>
-              <p className="text-muted-foreground whitespace-pre-line">{generatedReport.executiveSummary}</p>
-            </section>
+            {generatedReport.executiveSummary && (
+              <section>
+                <h3 className="text-lg font-semibold mb-2 text-foreground">Executive Summary</h3>
+                <p className="text-muted-foreground whitespace-pre-line">{generatedReport.executiveSummary}</p>
+              </section>
+            )}
 
-            <section>
-              <h3 className="text-lg font-semibold mb-3 text-foreground">Key Metrics Trend Analysis</h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                <Card className="bg-muted/20 p-4">
-                  <CardTitle className="text-md mb-1">Carbon Footprint</CardTitle>
-                  <p className="text-sm text-muted-foreground whitespace-pre-line">{generatedReport.keyMetricsTrendAnalysis.carbonFootprint}</p>
-                </Card>
-                <Card className="bg-muted/20 p-4">
-                  <CardTitle className="text-md mb-1">Energy Consumption</CardTitle>
-                  <p className="text-sm text-muted-foreground whitespace-pre-line">{generatedReport.keyMetricsTrendAnalysis.energyConsumption}</p>
-                </Card>
-                <Card className="bg-muted/20 p-4">
-                  <CardTitle className="text-md mb-1">Water Usage</CardTitle>
-                  <p className="text-sm text-muted-foreground whitespace-pre-line">{generatedReport.keyMetricsTrendAnalysis.waterUsage}</p>
-                </Card>
-                <Card className="bg-muted/20 p-4">
-                  <CardTitle className="text-md mb-1">Waste Generation</CardTitle>
-                  <p className="text-sm text-muted-foreground whitespace-pre-line">{generatedReport.keyMetricsTrendAnalysis.wasteGeneration}</p>
-                </Card>
-              </div>
-            </section>
+            {generatedReport.keyMetricsTrendAnalysis && (
+              <section>
+                <h3 className="text-lg font-semibold mb-3 text-foreground">Key Metrics Trend Analysis</h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {generatedReport.keyMetricsTrendAnalysis.carbonFootprint && (
+                    <Card className="bg-muted/20 p-4">
+                      <CardTitle className="text-md mb-1">Carbon Footprint</CardTitle>
+                      <p className="text-sm text-muted-foreground whitespace-pre-line">{generatedReport.keyMetricsTrendAnalysis.carbonFootprint}</p>
+                    </Card>
+                  )}
+                  {generatedReport.keyMetricsTrendAnalysis.energyConsumption && (
+                    <Card className="bg-muted/20 p-4">
+                      <CardTitle className="text-md mb-1">Energy Consumption</CardTitle>
+                      <p className="text-sm text-muted-foreground whitespace-pre-line">{generatedReport.keyMetricsTrendAnalysis.energyConsumption}</p>
+                    </Card>
+                  )}
+                  {generatedReport.keyMetricsTrendAnalysis.waterUsage && (
+                    <Card className="bg-muted/20 p-4">
+                      <CardTitle className="text-md mb-1">Water Usage</CardTitle>
+                      <p className="text-sm text-muted-foreground whitespace-pre-line">{generatedReport.keyMetricsTrendAnalysis.waterUsage}</p>
+                    </Card>
+                  )}
+                  {generatedReport.keyMetricsTrendAnalysis.wasteGeneration && (
+                    <Card className="bg-muted/20 p-4">
+                      <CardTitle className="text-md mb-1">Waste Generation</CardTitle>
+                      <p className="text-sm text-muted-foreground whitespace-pre-line">{generatedReport.keyMetricsTrendAnalysis.wasteGeneration}</p>
+                    </Card>
+                  )}
+                </div>
+              </section>
+            )}
             
-            <section>
-              <h3 className="text-lg font-semibold mb-2 text-foreground">Carbon Emission Breakdown</h3>
-              <p className="text-muted-foreground mb-4 whitespace-pre-line">{generatedReport.carbonEmissionBreakdown.analysisText}</p>
-              {generatedReport.carbonEmissionBreakdown.sourceData && generatedReport.carbonEmissionBreakdown.sourceData.length > 0 && (
-                <ChartContainer config={emissionSourceChartConfig} className="h-[350px] w-full max-w-lg mx-auto">
-                  <ResponsiveContainer width="100%" height={350}>
-                    <PieChart>
-                      <RechartsTooltip content={<ChartTooltipContent nameKey="name" />} />
-                      <Pie
-                        data={generatedReport.carbonEmissionBreakdown.sourceData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={100}
-                        labelLine={false}
-                        label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }) => {
-                          const RADIAN = Math.PI / 180;
-                          const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-                          const x = cx + (radius + 25) * Math.cos(-midAngle * RADIAN);
-                          const y = cy + (radius + 25) * Math.sin(-midAngle * RADIAN);
-                          const item = generatedReport.carbonEmissionBreakdown.sourceData[index];
-                          const Icon = getIconForSource(item.name);
-                          return (
-                            <>
-                              <text x={x} y={y - 5} fill="hsl(var(--foreground))" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="text-xs font-medium">
-                                {`${item.name} (${(item.percentage).toFixed(0)}%)`}
-                              </text>
-                              {Icon && 
-                                <foreignObject x={x - (x > cx ? 0 : 16) - (x > cx ? -4 : 4) } y={y + 5} width="16" height="16" >
-                                   <Icon className="w-4 h-4" style={{color: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length]}} />
-                                </foreignObject>
-                              }
-                            </>
-                          );
-                        }}
-                      >
-                        {generatedReport.carbonEmissionBreakdown.sourceData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={PIE_CHART_COLORS[index % PIE_CHART_COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <ChartLegendComponent content={<ChartLegendComponent nameKey="name" />} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-              )}
-            </section>
+            {generatedReport.carbonEmissionBreakdown?.analysisText && (
+              <section>
+                <h3 className="text-lg font-semibold mb-2 text-foreground">Carbon Emission Breakdown</h3>
+                <p className="text-muted-foreground mb-4 whitespace-pre-line">{generatedReport.carbonEmissionBreakdown.analysisText}</p>
+                {generatedReport.carbonEmissionBreakdown.sourceData && generatedReport.carbonEmissionBreakdown.sourceData.length > 0 && (
+                  <ChartContainer config={emissionSourceChartConfig} className="h-[350px] w-full max-w-lg mx-auto">
+                    <ResponsiveContainer width="100%" height={350}>
+                      <PieChart>
+                        <RechartsTooltip content={<ChartTooltipContent nameKey="name" />} />
+                        <Pie
+                          data={generatedReport.carbonEmissionBreakdown.sourceData}
+                          dataKey="value"
+                          nameKey="name"
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={100}
+                          labelLine={false}
+                          label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
+                            const RADIAN = Math.PI / 180;
+                            // Adjust radius for label positioning to avoid overlap if many small slices
+                            const labelRadius = innerRadius + (outerRadius - innerRadius) * 0.5 + (outerRadius * 0.3);
+                            const x = cx + labelRadius * Math.cos(-midAngle * RADIAN);
+                            const y = cy + labelRadius * Math.sin(-midAngle * RADIAN);
+                            const item = generatedReport.carbonEmissionBreakdown.sourceData[index];
+                            const Icon = getIconForSource(item.name);
+                            return (
+                              <g>
+                                <text x={x} y={y - 5} fill="hsl(var(--foreground))" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="text-xs font-medium">
+                                  {`${item.name} (${(item.percentage).toFixed(0)}%)`}
+                                </text>
+                                {Icon && 
+                                  <foreignObject x={x - (x > cx ? 0 : 16) - (x > cx ? -4 : 4) } y={y + 5} width="16" height="16" >
+                                     <Icon className="w-4 h-4" style={{color: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length]}} />
+                                  </foreignObject>
+                                }
+                              </g>
+                            );
+                          }}
+                        >
+                          {generatedReport.carbonEmissionBreakdown.sourceData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={PIE_CHART_COLORS[index % PIE_CHART_COLORS.length]} stroke="hsl(var(--background))" strokeWidth={2} />
+                          ))}
+                        </Pie>
+                        <ChartLegendComponent content={<ChartLegendComponent nameKey="name" />} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                )}
+              </section>
+            )}
 
-            <section>
-              <h3 className="text-lg font-semibold mb-2 text-foreground">AI Insights & Recommendations</h3>
-              <Alert variant="default" className="mb-4">
-                <Lightbulb className="h-5 w-5" />
-                <AlertTitle>AI Assessment: {generatedReport.aiInsightsAndRecommendations.currentAssessment}</AlertTitle>
-                <AlertDescription>
-                  {generatedReport.aiInsightsAndRecommendations.improvementAdvice && generatedReport.aiInsightsAndRecommendations.improvementAdvice.length > 0 && (
-                    <>
-                      <strong className="block mt-2 mb-1">Improvement Advice:</strong>
-                      <ul className="list-disc space-y-1 pl-5">
-                        {generatedReport.aiInsightsAndRecommendations.improvementAdvice.map((advice, index) => (
-                          <li key={index}>{advice}</li>
-                        ))}
-                      </ul>
-                    </>
-                  )}
-                  {generatedReport.aiInsightsAndRecommendations.positiveRemarks && generatedReport.aiInsightsAndRecommendations.positiveRemarks.length > 0 && (
-                    <>
-                      <strong className="block mt-2 mb-1">Positive Remarks:</strong>
-                      <ul className="list-disc space-y-1 pl-5">
-                        {generatedReport.aiInsightsAndRecommendations.positiveRemarks.map((remark, index) => (
-                          <li key={index}>{remark}</li>
-                        ))}
-                      </ul>
-                    </>
-                  )}
-                </AlertDescription>
-              </Alert>
-            </section>
-
-            <section>
-              <h3 className="text-lg font-semibold mb-2 text-foreground">Future Outlook Projection</h3>
-              <p className="text-muted-foreground whitespace-pre-line">{generatedReport.futureOutlookProjection}</p>
-            </section>
+            {generatedReport.aiInsightsAndRecommendations && (
+              <section>
+                <h3 className="text-lg font-semibold mb-2 text-foreground">AI Insights & Recommendations</h3>
+                <Alert variant="default" className="mb-4 border-primary/30 bg-primary/5">
+                  <Lightbulb className="h-5 w-5 text-primary" />
+                  <AlertTitle className="text-primary">AI Assessment: {generatedReport.aiInsightsAndRecommendations.currentAssessment}</AlertTitle>
+                  <AlertDescription>
+                    {generatedReport.aiInsightsAndRecommendations.improvementAdvice && generatedReport.aiInsightsAndRecommendations.improvementAdvice.length > 0 && (
+                      <>
+                        <strong className="block mt-2 mb-1">Improvement Advice:</strong>
+                        <ul className="list-disc space-y-1 pl-5">
+                          {generatedReport.aiInsightsAndRecommendations.improvementAdvice.map((advice, index) => (
+                            <li key={index}>{advice}</li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+                    {generatedReport.aiInsightsAndRecommendations.positiveRemarks && generatedReport.aiInsightsAndRecommendations.positiveRemarks.length > 0 && (
+                      <>
+                        <strong className="block mt-2 mb-1">Positive Remarks:</strong>
+                        <ul className="list-disc space-y-1 pl-5">
+                          {generatedReport.aiInsightsAndRecommendations.positiveRemarks.map((remark, index) => (
+                            <li key={index}>{remark}</li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+                  </AlertDescription>
+                </Alert>
+              </section>
+            )}
+            
+            {generatedReport.futureOutlookProjection && (
+              <section>
+                <h3 className="text-lg font-semibold mb-2 text-foreground">Future Outlook Projection</h3>
+                <p className="text-muted-foreground whitespace-pre-line">{generatedReport.futureOutlookProjection}</p>
+              </section>
+            )}
           </CardContent>
           <CardFooter>
             <div className="flex items-start gap-2 text-xs text-muted-foreground p-3 rounded-md bg-muted/20 border border-dashed w-full">
@@ -399,6 +416,3 @@ export default function ReportsPage() {
     </div>
   );
 }
-
-
-    

@@ -11,7 +11,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import type {CarbonFootprintPredictionInput} from './carbon-footprint-prediction'; // Reuse existing input type
+// import type {CarbonFootprintPredictionInput} from './carbon-footprint-prediction'; // Reuse existing input type // This import is not used
 
 // Define input schema based on CarbonFootprintPredictionInput for current metrics
 const GenerateComprehensiveReportInputSchema = z.object({
@@ -82,7 +82,7 @@ Based on this data and general environmental knowledge, please populate the foll
 
 1.  **Report Meta:**
     *   \`reportTitle\`: Set this to "Environmental Impact Report for {{companyName}}".
-    *   \`generatedDate\`: Use the current date in YYYY-MM-DD format. (This is already handled in the flow, you can acknowledge it).
+    *   \`generatedDate\`: Use the current date in YYYY-MM-DD format.
     *   \`periodCovered\`: Use the provided "{{reportingPeriod}}".
 
 2.  **Executive Summary (\`executiveSummary\`):**
@@ -120,6 +120,8 @@ Based on this data and general environmental knowledge, please populate the foll
 Ensure all text is professional, concise, and directly addresses the company's situation based on the provided metrics. The \`carbonEmissionBreakdown.sourceData\` values should be realistic estimations based on the inputs.
 Assume a standard office-based or light service industry profile for {{companyName}} unless inputs strongly suggest otherwise.
 The total implicit carbon footprint for the breakdown can be roughly estimated: (energyConsumption * 0.0005 + travelDistance * 0.0002 + wasteGeneration * 0.001) * 12 for an annual estimate in tons, then distribute this among sources. This is a rough guide, use your expert judgment for plausible values and percentages in the breakdown.
+
+Before finalizing, please double-check that your entire response strictly conforms to the output JSON schema, especially the data types and structure for \`carbonEmissionBreakdown.sourceData\` and all other fields.
 Strictly adhere to the output schema and its field descriptions.
 `,
 });
@@ -135,8 +137,8 @@ const generateComprehensiveReportFlow = ai.defineFlow(
     // Add current date for generatedDate
     const fullInput = {
       ...input,
-      // generatedDate is already part of the output schema and will be set by the LLM based on prompt instructions.
-      // However, if we want to *force* it, we can add it here. Let's assume the LLM will handle it.
+      // generatedDate is instructed to be set by the LLM.
+      // A fallback exists in the calling component or could be added here if LLM proves unreliable for this field.
     };
     const {output} = await generateComprehensiveReportPrompt(fullInput);
 
