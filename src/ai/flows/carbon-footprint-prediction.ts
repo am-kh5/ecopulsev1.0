@@ -17,6 +17,8 @@ const CarbonFootprintPredictionInputSchema = z.object({
   wasteGeneration: z.number().describe('Monthly waste generation in kilograms.'),
   companySize: z.number().describe('Number of employees in the company.'),
   location: z.string().describe('Location of the company (e.g., city, country).'),
+  currentRecyclingRate: z.number().optional().describe('Current recycling rate as a percentage (0-100). Sourced from dashboard data.'),
+  currentRenewableEnergyMix: z.number().optional().describe('Current renewable energy mix as a percentage (0-100). Sourced from dashboard data.'),
 });
 export type CarbonFootprintPredictionInput = z.infer<typeof CarbonFootprintPredictionInputSchema>;
 
@@ -38,22 +40,38 @@ const carbonFootprintPredictionPrompt = ai.definePrompt({
   input: {schema: CarbonFootprintPredictionInputSchema},
   output: {schema: CarbonFootprintPredictionOutputSchema},
   prompt: `You are an expert AI environmental consultant specializing in corporate carbon footprints.
-Based on the provided current monthly operational data for a company, you need to:
+Based on the provided current monthly operational data and dashboard metrics for a company, you need to:
 1. Calculate the \`predictedMonthlyFootprint\` in tons of CO2 equivalent.
-2. Provide a \`footprintAssessment\` (e.g., "Very High", "High", "Moderate", "Low", "Very Low") for this monthly footprint. Consider the company size and location to infer typical industry benchmarks (assume general office-based business or light manufacturing if not specified by location context).
-3. Based on the assessment and the input values:
-    - If the assessment is 'Very High', 'High' or 'Moderate', or if specific inputs (energy, travel, waste) seem notably high for the company size/location context, provide 3-5 actionable \`improvementAdvice\` points. These should be specific and practical (e.g., "Consider switching to LED lighting to reduce energy consumption by an estimated X%.", "Implement a remote work policy for X days a week to reduce travel emissions.", "Conduct a waste audit to identify key areas for reduction and recycling.").
-    - If the assessment is 'Low' or 'Very Low' and inputs indicate good practices, provide 1-3 concise \`positiveRemarks\` (e.g., "Your company's energy consumption is commendably low for its size.", "The current waste generation level suggests effective reduction measures are in place.").
+2. Provide a \`footprintAssessment\` (e.g., "Very High", "High", "Moderate", "Low", "Very Low") for this monthly footprint. Consider the company size, location, and other provided metrics like current recycling rate and renewable energy mix to infer typical industry benchmarks (assume general office-based business or light manufacturing if not specified by location context).
+3. Based on the assessment and all input values (including energy, travel, waste, recycling rate, renewable energy mix):
+    - If the assessment is 'Very High', 'High' or 'Moderate', or if specific inputs seem notably high/low for the company size/location context, provide 3-5 actionable \`improvementAdvice\` points. These should be specific and practical. Examples:
+        - "Consider switching to LED lighting to reduce energy consumption by an estimated X%."
+        - "Implement a remote work policy for X days a week to reduce travel emissions."
+        - "Conduct a waste audit to identify key areas for reduction and recycling. Your current recycling rate is {{currentRecyclingRate}}%." (Mention if provided and relevant)
+        - "Explore options to increase your renewable energy mix from the current {{currentRenewableEnergyMix}}%. Sourcing X% more renewable energy could reduce emissions by Y." (Mention if provided and relevant)
+    - If the assessment is 'Low' or 'Very Low' and inputs indicate good practices, provide 1-3 concise \`positiveRemarks\`. Examples:
+        - "Your company's energy consumption is commendably low for its size."
+        - "The current waste generation level suggests effective reduction measures are in place."
+        - "Your current recycling rate of {{currentRecyclingRate}}% is excellent and significantly contributes to a lower environmental impact." (Mention if provided and relevant)
+        - "Utilizing {{currentRenewableEnergyMix}}% renewable energy is a strong positive factor in your carbon footprint." (Mention if provided and relevant)
 4. Calculate the \`projectedAnnualFootprint\` based on the predicted monthly footprint (predictedMonthlyFootprint * 12).
 
-Company operational data:
+Company operational and dashboard data:
 - Monthly energy consumption: {{{energyConsumption}}} kWh
 - Monthly travel distance: {{{travelDistance}}} km
 - Monthly waste generation: {{{wasteGeneration}}} kg
 - Number of employees: {{{companySize}}}
 - Location: {{{location}}}
+{{#if currentRecyclingRate}}
+- Current Recycling Rate: {{{currentRecyclingRate}}}%
+{{/if}}
+{{#if currentRenewableEnergyMix}}
+- Current Renewable Energy Mix: {{{currentRenewableEnergyMix}}}%
+{{/if}}
 
-Ensure your response strictly adheres to the output schema. Be realistic with estimations in advice. If providing advice, focus on the most impactful changes first. If providing positive remarks, be specific about what they are doing well.
+Ensure your response strictly adheres to the output schema. Be realistic with estimations in advice.
+If providing advice, focus on the most impactful changes first. Incorporate the recycling rate and renewable energy mix into your advice or remarks where appropriate.
+If providing positive remarks, be specific about what they are doing well, referencing the provided metrics if available.
 Avoid conversational fluff; stick to the requested outputs.
 Example for advice: "Invest in smart thermostats to optimize HVAC energy use, potentially saving 5-10% on heating/cooling costs."
 Example for positive remark: "Maintaining low travel distances per employee significantly contributes to your positive footprint."

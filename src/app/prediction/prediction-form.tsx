@@ -14,17 +14,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, BarChart3, AlertTriangle, CheckCircle2, Lightbulb, ThumbsUp, Zap, Recycle, Car, Info } from 'lucide-react';
+import { Loader2, BarChart3, AlertTriangle, CheckCircle2, Lightbulb, ThumbsUp, Zap, Recycle, Car, Info, Wind, Sun } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-// This would ideally be fetched or passed as a prop from a service/context that has dashboard data.
-// For now, using the last electricity value from the dashboard's monthlyUtilityData (June: 29000 kWh).
-const LATEST_DASHBOARD_ENERGY_CONSUMPTION = 29000; 
+// These would ideally be fetched or passed as props from a service/context that has dashboard data.
+// For now, using static values that correspond to the dashboard's sample data.
+const LATEST_DASHBOARD_ENERGY_CONSUMPTION = 29000; // kWh (from dashboard/page.tsx monthlyUtilityData for June)
+const LATEST_RECYCLING_RATE = 70; // % (from dashboard/page.tsx kpiData)
+const LATEST_RENEWABLE_ENERGY_MIX = 65; // % (from dashboard/page.tsx kpiData)
+
 
 const predictionFormSchema = z.object({
-  // energyConsumption is now derived from dashboard data
+  // energyConsumption, currentRecyclingRate, currentRenewableEnergyMix are now derived from dashboard data
   travelDistance: z.coerce.number().min(0, "Travel distance must be positive"),
-  wasteGeneration: z.coerce.number().min(0, "Waste generation must be positive"),
+  wasteGeneration: z.coerce.number().min(0, "Waste generation must be positive"), // This remains user input as dashboard "Water Waste" is in m³, model expects kg for general waste.
   companySize: z.coerce.number().int().min(1, "Company size must be at least 1"),
   location: z.string().min(2, "Location is required (e.g., City, Country)"),
 });
@@ -39,8 +42,8 @@ export default function PredictionForm() {
   const form = useForm<PredictionFormValues>({
     resolver: zodResolver(predictionFormSchema),
     defaultValues: {
-      travelDistance: 5000, // Default or could be pre-filled from other company settings
-      wasteGeneration: 2000, // Default or could be pre-filled
+      travelDistance: 5000, 
+      wasteGeneration: 2000, 
       companySize: 50,
       location: "New York, USA",
     },
@@ -51,7 +54,9 @@ export default function PredictionForm() {
     setPredictionResult(null);
 
     const predictionInput: CarbonFootprintPredictionInput = {
-      energyConsumption: LATEST_DASHBOARD_ENERGY_CONSUMPTION, // Use the dashboard value
+      energyConsumption: LATEST_DASHBOARD_ENERGY_CONSUMPTION,
+      currentRecyclingRate: LATEST_RECYCLING_RATE,
+      currentRenewableEnergyMix: LATEST_RENEWABLE_ENERGY_MIX,
       travelDistance: formData.travelDistance,
       wasteGeneration: formData.wasteGeneration,
       companySize: formData.companySize,
@@ -85,11 +90,9 @@ export default function PredictionForm() {
       case 'high':
         return 'text-destructive';
       case 'moderate':
-        // Using text-orange-500 from Tailwind directly as it's not in the theme for destructive/success
         return 'text-orange-500'; 
       case 'low':
       case 'very low':
-         // Using text-green-600 from Tailwind directly
         return 'text-green-600';
       default:
         return 'text-foreground';
@@ -106,24 +109,44 @@ export default function PredictionForm() {
             AI Carbon Footprint Analysis
           </CardTitle>
           <CardDescription>
-            Your latest monthly energy consumption from the dashboard is used for this analysis. 
-            Please provide the other details to predict your company's carbon footprint and receive actionable advice.
+            Key metrics from your dashboard (energy use, recycling rate, renewables) are automatically included. 
+            Please provide the remaining details to predict your company's carbon footprint and receive actionable advice.
           </CardDescription>
         </CardHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <CardContent className="space-y-6">
-              <div>
-                <Label className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
-                  <Zap className="w-4 h-4" />
-                  Monthly Energy Consumption (from Dashboard)
-                </Label>
-                <div className="mt-1 p-3 border rounded-md bg-muted/30 text-foreground font-semibold text-lg">
-                  {LATEST_DASHBOARD_ENERGY_CONSUMPTION.toLocaleString()} kWh
+              <div className="space-y-3">
+                <div className="p-3 border rounded-md bg-muted/30">
+                  <Label className="flex items-center gap-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <Zap className="w-4 h-4" />
+                    Monthly Energy Consumption
+                  </Label>
+                  <div className="mt-1 text-foreground font-semibold text-lg">
+                    {LATEST_DASHBOARD_ENERGY_CONSUMPTION.toLocaleString()} kWh
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">Sourced from dashboard</p>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1 pl-1">
-                  This value is automatically pulled from your latest dashboard metrics.
-                </p>
+                <div className="p-3 border rounded-md bg-muted/30">
+                  <Label className="flex items-center gap-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <Recycle className="w-4 h-4" />
+                    Current Recycling Rate
+                  </Label>
+                  <div className="mt-1 text-foreground font-semibold text-lg">
+                    {LATEST_RECYCLING_RATE}%
+                  </div>
+                   <p className="text-xs text-muted-foreground mt-0.5">Sourced from dashboard</p>
+                </div>
+                 <div className="p-3 border rounded-md bg-muted/30">
+                  <Label className="flex items-center gap-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <Sun className="w-4 h-4" />
+                    Current Renewable Energy Mix
+                  </Label>
+                  <div className="mt-1 text-foreground font-semibold text-lg">
+                    {LATEST_RENEWABLE_ENERGY_MIX}%
+                  </div>
+                   <p className="text-xs text-muted-foreground mt-0.5">Sourced from dashboard</p>
+                </div>
               </div>
 
               <FormField
@@ -148,6 +171,7 @@ export default function PredictionForm() {
                     <FormControl>
                       <Input type="number" placeholder="e.g., 2000" {...field} />
                     </FormControl>
+                     <FormDescription>Total non-hazardous solid waste generated by the company.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -197,11 +221,11 @@ export default function PredictionForm() {
 
       {isLoading && !predictionResult && (
         <Card className="shadow-lg h-full flex flex-col items-center justify-center">
-            <CardContent className="text-center">
+            <CardContent className="text-center p-6">
               <Loader2 className="h-16 w-16 animate-spin text-primary mb-6" />
               <h3 className="text-xl font-semibold text-foreground mb-2">AI is analyzing your data...</h3>
               <p className="text-muted-foreground">
-                This might take a few moments. We're generating predictions and personalized advice based on your company's profile and latest energy metrics.
+                This might take a few moments. We're generating predictions and personalized advice based on your company's profile and latest dashboard metrics.
               </p>
             </CardContent>
         </Card>
@@ -277,4 +301,3 @@ export default function PredictionForm() {
     </div>
   );
 }
-
