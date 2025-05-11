@@ -71,7 +71,7 @@ const PageHeader = () => {
 
 
   const currentNavItem = navItems.find(item => pathname.startsWith(item.href));
-  const pageTitle = currentNavItem ? currentNavItem.label : pathname.startsWith('/settings') ? 'Settings' : "EcoTrack";
+  const pageTitle = currentNavItem ? currentNavItem.label : pathname.startsWith('/settings') ? 'Settings' : "EcoPulse";
 
   const showMobileToggle = isMobile || (sidebarCollapsibleOption === 'icon' && sidebarState === 'collapsed' && !isHovering);
 
@@ -140,14 +140,14 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   if (!mounted) {
     // This block is rendered on the server and on the initial client render.
     // It MUST match the server output to avoid hydration errors.
-    // The error log indicates server rendered w-12 for aside.
+    // The w-14 matches --sidebar-collapsed-width-icon (3.5rem)
     return (
       <div className="flex flex-col min-h-screen bg-background">
         <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6">
           {/* Simplified PageHeader content */}
           <div className="flex items-center gap-2"> {/* Simplified Logo */}
             <Leaf className="h-7 w-7 text-primary" />
-             <h1 className='font-bold text-2xl text-foreground'>EcoTrack</h1>
+             <h1 className='font-bold text-2xl text-foreground'>EcoPulse</h1>
           </div>
           <div className="flex-1"></div> {/* Placeholder for title derived from page */}
            <Avatar className="h-8 w-8"> {/* Simplified User Dropdown */}
@@ -155,8 +155,8 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             </Avatar>
         </header>
         <div className="flex flex-1">
-          <aside className="hidden md:block w-12 border-r bg-sidebar"></aside> {/* Static width for SSR/pre-hydration to match server log */}
-          <main className="flex-1 overflow-y-auto p-6 md:ml-12"> {/* Static margin for SSR/pre-hydration to match server log */}
+          <aside className="hidden md:block w-14 border-r bg-sidebar"></aside> {/* Static width for SSR/pre-hydration */}
+          <main className="flex-1 overflow-y-auto p-6 md:ml-14"> {/* Static margin for SSR/pre-hydration */}
             {children}
           </main>
         </div>
@@ -173,7 +173,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
         side="left"
       >
         <SidebarHeader> 
-          <Link href="/dashboard" className="flex items-center gap-2 group-data-[collapsible=icon]/sidebar:justify-center">
+          <Link href="/" className="flex items-center gap-2 group-data-[collapsible=icon]/sidebar:justify-center">
             <Logo iconSize={28} textSize="text-2xl" />
           </Link>
         </SidebarHeader>
@@ -223,5 +223,3 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default AppLayout;
-
-    

@@ -27,10 +27,10 @@ export default function HomePage() {
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-2">
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none text-primary">
-                    Track, Predict, and Reduce Your Environmental Impact
+                    Track, Predict, and Reduce Your Environmental Impact with EcoPulse
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    EcoTrack empowers businesses to make sustainable choices with powerful data analytics, AI-driven predictions, and engaging tools.
+                    EcoPulse empowers businesses to make sustainable choices with powerful data analytics, AI-driven predictions, and engaging tools.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
@@ -47,7 +47,7 @@ export default function HomePage() {
                 </div>
               </div>
               <Image
-                alt="EcoTrack Hero"
+                alt="EcoPulse Hero"
                 className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last lg:aspect-square shadow-lg"
                 height="550"
                 src="https://picsum.photos/550/550?random=1"
@@ -64,7 +64,7 @@ export default function HomePage() {
                 <div className="inline-block rounded-lg bg-secondary px-3 py-1 text-sm text-secondary-foreground">Key Features</div>
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-primary">Everything You Need for Sustainability</h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  From insightful dashboards to AI predictions and competitive leaderboards, EcoTrack provides a comprehensive suite of tools.
+                  From insightful dashboards to AI predictions and competitive leaderboards, EcoPulse provides a comprehensive suite of tools.
                 </p>
               </div>
             </div>
@@ -94,7 +94,7 @@ export default function HomePage() {
         </section>
       </main>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
-        <p className="text-xs text-muted-foreground">&copy; {new Date().getFullYear()} EcoTrack. All rights reserved.</p>
+        <p className="text-xs text-muted-foreground">&copy; {new Date().getFullYear()} EcoPulse. All rights reserved.</p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link className="text-xs hover:underline underline-offset-4 text-muted-foreground" href="#">
             Terms of Service

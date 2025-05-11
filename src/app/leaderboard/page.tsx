@@ -32,7 +32,7 @@ export default function LeaderboardPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Trophy className="h-6 w-6 text-accent" />
-            EcoTrack Leaderboard
+            EcoPulse Leaderboard
           </CardTitle>
           <CardDescription>
             See how companies rank based on their environmental impact reduction efforts. Earn points for sustainable practices!
@@ -99,7 +99,7 @@ export default function LeaderboardPage() {
             <li>Percentage reduction in carbon footprint month-over-month.</li>
             <li>Achieving specific energy saving milestones.</li>
             <li>Implementing water conservation initiatives.</li>
-            <li>Participation in EcoTrack challenges and programs.</li>
+            <li>Participation in EcoPulse challenges and programs.</li>
             <li>Consistent data reporting and engagement.</li>
           </ul>
           <p>Special badges are awarded for outstanding achievements in specific categories!</p>

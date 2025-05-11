@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'EcoTrack - Monitor Your Environmental Impact',
-  description: 'EcoTrack helps companies monitor and reduce their environmental impact with data dashboards, AI predictions, and gamified challenges.',
+  title: 'EcoPulse - Monitor Your Environmental Impact',
+  description: 'EcoPulse helps companies monitor and reduce their environmental impact with data dashboards, AI predictions, and gamified challenges.',
 };
 
 export default function RootLayout({

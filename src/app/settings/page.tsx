@@ -49,7 +49,7 @@ export default function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Notification Settings</CardTitle>
-          <CardDescription>Configure how you receive notifications from EcoTrack.</CardDescription>
+          <CardDescription>Configure how you receive notifications from EcoPulse.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between space-x-2 p-4 border rounded-lg">
