@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -175,7 +176,19 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+    const { isMobile, open, setOpen, state, openMobile, setOpenMobile } = useSidebar();
+
+    const handleMouseEnter = () => {
+      if (!isMobile && collapsible === "icon" && !open) {
+        setOpen(true);
+      }
+    };
+
+    const handleMouseLeave = () => {
+      if (!isMobile && collapsible === "icon" && open) {
+        setOpen(false);
+      }
+    };
 
     if (collapsible === "none") {
       return (
@@ -220,6 +233,8 @@ const Sidebar = React.forwardRef<
         data-collapsible={state === "collapsed" ? collapsible : ""}
         data-variant={variant}
         data-side={side}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         {/* This is what handles the sidebar gap on desktop */}
         <div
