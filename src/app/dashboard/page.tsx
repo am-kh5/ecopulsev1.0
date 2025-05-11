@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { TrendingUp, TrendingDown, CloudDrizzle, Droplets, Zap, Leaf, Wind, Waves, Sun, Recycle, Building, Plane, PackageIcon } from "lucide-react";
+import { TrendingUp, TrendingDown, CloudDrizzle, Droplets, Zap, Leaf, Wind, Waves, Sun, Recycle, Building, Plane, PackageIcon, Award } from "lucide-react";
 import { BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Line, LineChart, Tooltip as RechartsTooltip, Bar, RadialBarChart, RadialBar, PolarAngleAxis, PieChart, Pie, Cell } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import type { ChartConfig } from "@/components/ui/chart";
@@ -21,10 +21,11 @@ const kpiData = [
   { title: "CO2 Emissions", value: "800", unit: "tons CO2", change: "+2.1%", trend: "up" as const, icon: CloudDrizzle, color: "hsl(var(--chart-2))" },
   { title: "Water Waste", value: "15,000", unit: "m³", change: "-10%", trend: "down" as const, icon: Droplets, color: "hsl(var(--chart-3))" },
   { title: "Electricity Usage", value: "300,000", unit: "kWh", change: "-3%", trend: "down" as const, icon: Zap, color: "hsl(var(--chart-4))" },
-  { title: "Air Quality (AQI)", value: "42", unit: "AQI", change: "-2.0%", trend: "down" as const, icon: Wind, color: "hsl(var(--chart-5))" },
+  { title: "Air Quality (AQI)", value: "42", unit: "AQI", change: "-2.0%", trend: "down" as const, icon: Wind, color: "hsl(var(--success))" }, // Changed to success color for good AQI
   { title: "Water Quality (WQI)", value: "75", unit: "WQI", change: "+1.5%", trend: "up" as const, icon: Waves, color: "hsl(var(--chart-3))" },
-  { title: "Renewable Energy", value: "65", unit: "% Mix", change: "+5%", trend: "up" as const, icon: Sun, color: "hsl(var(--chart-2))" }, // Using chart-2 (Orange)
-  { title: "Recycling Rate", value: "70", unit: "%", change: "+3%", trend: "up" as const, icon: Recycle, color: "hsl(var(--chart-1))" }, // Using chart-1 (Teal)
+  { title: "Renewable Energy", value: "65", unit: "% Mix", change: "+5%", trend: "up" as const, icon: Sun, color: "hsl(var(--chart-2))" }, 
+  { title: "Recycling Rate", value: "70", unit: "%", change: "+3%", trend: "up" as const, icon: Recycle, color: "hsl(var(--chart-1))" },
+  { title: "Leaderboard Points", value: "4,200", unit: "pts", change: "+50", trend: "up" as const, icon: Award, color: "hsl(var(--primary))" },
 ];
 
 const monthlyCarbonData = [
@@ -40,10 +41,12 @@ const carbonChartConfig = {
   footprint: {
     label: "Carbon Footprint (t CO2e)",
     color: "hsl(var(--chart-1))",
+    icon: Leaf,
   },
   co2: {
     label: "CO2 Emissions (t CO2)",
     color: "hsl(var(--chart-2))",
+    icon: CloudDrizzle,
   },
 } satisfies ChartConfig;
 
@@ -60,10 +63,12 @@ const utilityChartConfig = {
   water: {
     label: "Water Waste (m³)",
     color: "hsl(var(--chart-3))",
+    icon: Droplets,
   },
   electricity: {
     label: "Electricity (kWh)",
     color: "hsl(var(--chart-4))",
+    icon: Zap,
   },
 } satisfies ChartConfig;
 
@@ -76,7 +81,7 @@ const recyclingRateGaugeData = [{ name: "Recycled", value: 70, fill: "var(--colo
 const sustainabilityGaugeChartConfig = {
   aqi: {
     label: "AQI",
-    color: "hsl(var(--chart-5))", // Green-ish for good AQI
+    color: "hsl(var(--success))", // Green for good AQI
   },
   wqi: {
     label: "WQI",
@@ -99,9 +104,9 @@ const carbonSourceData = [
 ];
 
 const carbonSourceChartConfig = {
-  operations: { label: "Operations", color: "hsl(var(--chart-1))" },
-  travel: { label: "Travel & Logistics", color: "hsl(var(--chart-2))" },
-  materials: { label: "Materials & Supply Chain", color: "hsl(var(--chart-4))" }, // Using chart-4 for a different color
+  operations: { label: "Operations", color: "hsl(var(--chart-1))", icon: Building },
+  travel: { label: "Travel & Logistics", color: "hsl(var(--chart-2))", icon: Plane },
+  materials: { label: "Materials & Supply Chain", color: "hsl(var(--chart-4))", icon: PackageIcon }, 
 } satisfies ChartConfig;
 
 
@@ -121,7 +126,7 @@ export default function DashboardPage() {
         </CardHeader>
       </Card>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"> {/* Adjusted for 9 KPIs */}
         {kpiData.map((kpi) => (
           <Card key={kpi.title} className="shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -134,12 +139,16 @@ export default function DashboardPage() {
                 {kpi.unit}
               </p>
               <div className={`text-xs mt-1 flex items-center ${
-                kpi.trend === "down" && (kpi.title.includes("Footprint") || kpi.title.includes("Emissions") || kpi.title.includes("Waste") || kpi.title.includes("Usage") || kpi.title.includes("AQI")) ? "text-[hsl(var(--success))]" : 
-                kpi.trend === "up" && (kpi.title.includes("Footprint") || kpi.title.includes("Emissions")) ? "text-destructive" :
-                kpi.trend === "up" ? "text-[hsl(var(--success))]" : "text-destructive"
+                // Specific logic for "good" trends (lower is better for these, higher for others)
+                (kpi.trend === "down" && (kpi.title.includes("Footprint") || kpi.title.includes("Emissions") || kpi.title.includes("Waste") || kpi.title.includes("Usage") || kpi.title.includes("AQI"))) ? "text-[hsl(var(--success))]" : 
+                (kpi.trend === "up" && (kpi.title.includes("WQI") || kpi.title.includes("Energy") || kpi.title.includes("Recycling") || kpi.title.includes("Points"))) ? "text-[hsl(var(--success))]" :
+                "text-destructive" // Default to destructive for "bad" trends
               }`}>
-                 {kpi.trend === "down" ? <TrendingDown className="h-4 w-4 mr-1" /> : <TrendingUp className="h-4 w-4 mr-1" />}
-                {kpi.change} vs last month
+                 {kpi.trend === "down" && (kpi.title.includes("Footprint") || kpi.title.includes("Emissions") || kpi.title.includes("Waste") || kpi.title.includes("Usage") || kpi.title.includes("AQI")) ? <TrendingDown className="h-4 w-4 mr-1" /> : 
+                 kpi.trend === "up" && (kpi.title.includes("WQI") || kpi.title.includes("Energy") || kpi.title.includes("Recycling") || kpi.title.includes("Points")) ? <TrendingUp className="h-4 w-4 mr-1" /> : 
+                 kpi.trend === "up" ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" /> 
+                 }
+                {kpi.change} {kpi.title.includes("Points") ? "this month" : "vs last month"}
               </div>
             </CardContent>
           </Card>
@@ -165,9 +174,9 @@ export default function DashboardPage() {
                 />
                 <YAxis />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <ChartLegend content={<ChartLegendContent />} />
-                <Bar dataKey="footprint" fill="var(--color-footprint)" radius={4} />
-                <Bar dataKey="co2" fill="var(--color-co2)" radius={4} />
+                <ChartLegend content={<ChartLegendContent iconType="circle" />} />
+                <Bar dataKey="footprint" fill="var(--color-footprint)" radius={4} name={carbonChartConfig.footprint.label as string} />
+                <Bar dataKey="co2" fill="var(--color-co2)" radius={4} name={carbonChartConfig.co2.label as string} />
               </BarChart>
             </ChartContainer>
           </CardContent>
@@ -190,10 +199,10 @@ export default function DashboardPage() {
                   tickFormatter={(value) => value.slice(0, 3)}
                 />
                 <YAxis />
-                <RechartsTooltip content={<ChartTooltipContent hideIndicator />} />
-                <ChartLegend content={<ChartLegendContent />} />
-                <Line type="monotone" dataKey="water" stroke="var(--color-water)" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="electricity" stroke="var(--color-electricity)" strokeWidth={2} dot={false} />
+                <RechartsTooltip content={<ChartTooltipContent indicator="line" />} />
+                <ChartLegend content={<ChartLegendContent iconType="line" />} />
+                <Line type="monotone" dataKey="water" stroke="var(--color-water)" strokeWidth={3} dot={{r:4, strokeWidth:2}} activeDot={{r:6}} name={utilityChartConfig.water.label as string} />
+                <Line type="monotone" dataKey="electricity" stroke="var(--color-electricity)" strokeWidth={3} dot={{r:4, strokeWidth:2}} activeDot={{r:6}} name={utilityChartConfig.electricity.label as string} />
               </LineChart>
             </ChartContainer>
           </CardContent>
@@ -396,7 +405,7 @@ export default function DashboardPage() {
                                     <Cell key={`cell-${index}`} fill={entry.fill} />
                                 ))}
                             </Pie>
-                             <ChartLegend content={<ChartLegendContent nameKey="name" />} />
+                             <ChartLegend content={<ChartLegendContent nameKey="name" iconType="circle" />} />
                         </PieChart>
                     </ResponsiveContainer>
                 </ChartContainer>
