@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -86,15 +85,30 @@ const SidebarProvider = React.forwardRef<
         } else {
           _setOpen(openState)
         }
-        document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+        if (typeof document !== 'undefined') {
+          document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+        }
       },
       [setOpenProp, open]
     )
 
+    React.useEffect(() => {
+      if (typeof document !== 'undefined') {
+        const cookieValue = document.cookie.split('; ').find(row => row.startsWith(SIDEBAR_COOKIE_NAME + '='));
+        if (cookieValue) {
+          const cookieOpenState = cookieValue.split('=')[1] === 'true';
+          if (cookieOpenState !== _open) {
+             _setOpen(cookieOpenState);
+          }
+        }
+      }
+    }, []);
+
+
     const toggleSidebar = React.useCallback(() => {
       return isMobile
-        ? setOpenMobile((open) => !open)
-        : setOpen((open) => !open)
+        ? setOpenMobile((currentOpen) => !currentOpen)
+        : setOpen((currentOpen) => !currentOpen)
     }, [isMobile, setOpen, setOpenMobile])
 
     React.useEffect(() => {
@@ -107,9 +121,10 @@ const SidebarProvider = React.forwardRef<
           toggleSidebar()
         }
       }
-
-      window.addEventListener("keydown", handleKeyDown)
-      return () => window.removeEventListener("keydown", handleKeyDown)
+      if (typeof window !== 'undefined') {
+        window.addEventListener("keydown", handleKeyDown)
+        return () => window.removeEventListener("keydown", handleKeyDown)
+      }
     }, [toggleSidebar])
 
     const state = open ? "expanded" : "collapsed"
@@ -167,28 +182,30 @@ const Sidebar = React.forwardRef<
     {
       side = "left",
       variant = "sidebar",
-      collapsible = "offcanvas",
+      collapsible: collapsibleProp = "offcanvas", // Renamed to avoid conflict with context `collapsible`
       className,
       children,
       ...props
     },
     ref
   ) => {
-    const { isMobile, open, setOpen, state, openMobile, setOpenMobile } = useSidebar();
+    const { isMobile, open, setOpen, state, openMobile, setOpenMobile, collapsible: contextCollapsible } = useSidebar();
+    const effectiveCollapsible = collapsibleProp === "none" ? "none" : contextCollapsible;
+
 
     const handleMouseEnter = () => {
-      if (!isMobile && collapsible === "icon" && !open) {
+      if (!isMobile && effectiveCollapsible === "icon" && !open) {
         setOpen(true);
       }
     };
 
     const handleMouseLeave = () => {
-      if (!isMobile && collapsible === "icon" && open) {
+      if (!isMobile && effectiveCollapsible === "icon" && open) {
         setOpen(false);
       }
     };
-
-    if (collapsible === "none") {
+    
+    if (effectiveCollapsible === "none") {
       return (
         <div
           className={cn(
@@ -228,7 +245,7 @@ const Sidebar = React.forwardRef<
         ref={ref}
         className="group/sidebar peer hidden md:block text-sidebar-foreground"
         data-state={state}
-        data-collapsible={state === "collapsed" ? collapsible : ""}
+        data-collapsible={state === "collapsed" ? effectiveCollapsible : ""}
         data-variant={variant}
         data-side={side}
         onMouseEnter={handleMouseEnter}
@@ -236,7 +253,7 @@ const Sidebar = React.forwardRef<
       >
         <div
           className={cn(
-            "relative h-svh w-[--sidebar-width] bg-transparent transition-width duration-300 ease-in-out",
+            "relative h-svh w-[--sidebar-width] bg-transparent transition-all duration-300 ease-in-out",
             "group-data-[collapsible=offcanvas]/sidebar:w-0",
             "group-data-[side=right]/sidebar:rotate-180",
             variant === "floating" || variant === "inset"
@@ -246,7 +263,7 @@ const Sidebar = React.forwardRef<
         />
         <div
           className={cn(
-            "fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-[left,right,width] duration-300 ease-in-out md:flex",
+            "fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-all duration-300 ease-in-out md:flex", // Used transition-all instead of transition-[left,right,width] for simplicity, can be reverted if specific transitions are preferred.
             side === "left"
               ? "left-0 group-data-[collapsible=offcanvas]/sidebar:left-[calc(var(--sidebar-width)*-1)]"
               : "right-0 group-data-[collapsible=offcanvas]/sidebar:right-[calc(var(--sidebar-width)*-1)]",
