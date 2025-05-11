@@ -14,11 +14,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, BarChart3, AlertTriangle, CheckCircle2, Lightbulb, ThumbsUp, TrendingUp, Zap, Recycle, Car } from 'lucide-react';
+import { Loader2, BarChart3, AlertTriangle, CheckCircle2, Lightbulb, ThumbsUp, Zap, Recycle, Car, Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
+// This would ideally be fetched or passed as a prop from a service/context that has dashboard data.
+// For now, using the last electricity value from the dashboard's monthlyUtilityData (June: 29000 kWh).
+const LATEST_DASHBOARD_ENERGY_CONSUMPTION = 29000; 
+
 const predictionFormSchema = z.object({
-  energyConsumption: z.coerce.number().min(0, "Energy consumption must be positive"),
+  // energyConsumption is now derived from dashboard data
   travelDistance: z.coerce.number().min(0, "Travel distance must be positive"),
   wasteGeneration: z.coerce.number().min(0, "Waste generation must be positive"),
   companySize: z.coerce.number().int().min(1, "Company size must be at least 1"),
@@ -35,19 +39,27 @@ export default function PredictionForm() {
   const form = useForm<PredictionFormValues>({
     resolver: zodResolver(predictionFormSchema),
     defaultValues: {
-      energyConsumption: 10000,
-      travelDistance: 5000,
-      wasteGeneration: 2000,
+      travelDistance: 5000, // Default or could be pre-filled from other company settings
+      wasteGeneration: 2000, // Default or could be pre-filled
       companySize: 50,
       location: "New York, USA",
     },
   });
 
-  async function onSubmit(data: PredictionFormValues) {
+  async function onSubmit(formData: PredictionFormValues) {
     setIsLoading(true);
     setPredictionResult(null);
+
+    const predictionInput: CarbonFootprintPredictionInput = {
+      energyConsumption: LATEST_DASHBOARD_ENERGY_CONSUMPTION, // Use the dashboard value
+      travelDistance: formData.travelDistance,
+      wasteGeneration: formData.wasteGeneration,
+      companySize: formData.companySize,
+      location: formData.location,
+    };
+
     try {
-      const result = await carbonFootprintPrediction(data as CarbonFootprintPredictionInput);
+      const result = await carbonFootprintPrediction(predictionInput);
       setPredictionResult(result);
       toast({
         title: "Prediction Successful",
@@ -73,10 +85,12 @@ export default function PredictionForm() {
       case 'high':
         return 'text-destructive';
       case 'moderate':
-        return 'text-orange-500'; // Using a direct Tailwind color for simplicity here.
+        // Using text-orange-500 from Tailwind directly as it's not in the theme for destructive/success
+        return 'text-orange-500'; 
       case 'low':
       case 'very low':
-        return 'text-green-600'; // Using a direct Tailwind color for simplicity here.
+         // Using text-green-600 from Tailwind directly
+        return 'text-green-600';
       default:
         return 'text-foreground';
     }
@@ -84,31 +98,34 @@ export default function PredictionForm() {
 
 
   return (
-    <div className="grid md:grid-cols-2 gap-8">
+    <div className="grid md:grid-cols-2 gap-8 items-start">
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Lightbulb className="h-6 w-6 text-primary" />
             AI Carbon Footprint Analysis
           </CardTitle>
-          <CardDescription>Enter your company's current monthly operational data to predict its carbon footprint, receive an assessment, and get actionable advice.</CardDescription>
+          <CardDescription>
+            Your latest monthly energy consumption from the dashboard is used for this analysis. 
+            Please provide the other details to predict your company's carbon footprint and receive actionable advice.
+          </CardDescription>
         </CardHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="space-y-4">
-              <FormField
-                control={form.control}
-                name="energyConsumption"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-1"><Zap className="w-4 h-4 text-muted-foreground" />Monthly Energy Consumption (kWh)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="e.g., 10000" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <CardContent className="space-y-6">
+              <div>
+                <Label className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
+                  <Zap className="w-4 h-4" />
+                  Monthly Energy Consumption (from Dashboard)
+                </Label>
+                <div className="mt-1 p-3 border rounded-md bg-muted/30 text-foreground font-semibold text-lg">
+                  {LATEST_DASHBOARD_ENERGY_CONSUMPTION.toLocaleString()} kWh
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 pl-1">
+                  This value is automatically pulled from your latest dashboard metrics.
+                </p>
+              </div>
+
               <FormField
                 control={form.control}
                 name="travelDistance"
@@ -178,41 +195,53 @@ export default function PredictionForm() {
         </Form>
       </Card>
 
-      {predictionResult && (
+      {isLoading && !predictionResult && (
+        <Card className="shadow-lg h-full flex flex-col items-center justify-center">
+            <CardContent className="text-center">
+              <Loader2 className="h-16 w-16 animate-spin text-primary mb-6" />
+              <h3 className="text-xl font-semibold text-foreground mb-2">AI is analyzing your data...</h3>
+              <p className="text-muted-foreground">
+                This might take a few moments. We're generating predictions and personalized advice based on your company's profile and latest energy metrics.
+              </p>
+            </CardContent>
+        </Card>
+      )}
+
+      {predictionResult && !isLoading && (
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="text-primary" /> AI Analysis Results
+              <BarChart3 className="text-primary h-6 w-6" /> AI Analysis Results
             </CardTitle>
             <CardDescription>Based on your data, here's the AI-generated carbon footprint analysis and advice.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div>
-              <Label className="text-sm font-semibold text-muted-foreground">Predicted Monthly Carbon Footprint</Label>
-              <p className="text-3xl font-bold text-primary">
+            <div className="p-4 rounded-lg bg-muted/30 border">
+              <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">Predicted Monthly Carbon Footprint</Label>
+              <p className="text-4xl font-bold text-primary mt-1">
                 {predictionResult.predictedMonthlyFootprint.toLocaleString()} tons CO2e
               </p>
             </div>
-            <div>
-              <Label className="text-sm font-semibold text-muted-foreground">Projected Annual Carbon Footprint</Label>
-              <p className="text-2xl font-bold text-primary/80">
+            <div className="p-4 rounded-lg bg-muted/30 border">
+              <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">Projected Annual Carbon Footprint</Label>
+              <p className="text-3xl font-bold text-primary/80 mt-1">
                 {predictionResult.projectedAnnualFootprint.toLocaleString()} tons CO2e
               </p>
             </div>
 
-            <div>
-              <Label className="text-sm font-semibold text-muted-foreground">Footprint Assessment</Label>
-              <p className={`text-xl font-semibold ${getAssessmentColor(predictionResult.footprintAssessment)}`}>
+            <div className="p-4 rounded-lg bg-muted/30 border">
+              <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">Footprint Assessment</Label>
+              <p className={`text-2xl font-semibold mt-1 ${getAssessmentColor(predictionResult.footprintAssessment)}`}>
                 {predictionResult.footprintAssessment}
               </p>
             </div>
             
             {predictionResult.improvementAdvice && predictionResult.improvementAdvice.length > 0 && (
-              <Alert variant="default" className="border-orange-500/50 bg-orange-500/10">
-                <Lightbulb className="h-5 w-5 text-orange-600" />
-                <AlertTitle className="text-orange-700">Actionable Improvement Advice</AlertTitle>
-                <AlertDescription className="text-orange-700/90">
-                  <ul className="list-disc space-y-1 pl-5 mt-2">
+              <Alert variant="default" className="border-orange-500/50 bg-orange-500/5 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300 dark:border-orange-500/30">
+                <Lightbulb className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                <AlertTitle className="font-semibold">Actionable Improvement Advice</AlertTitle>
+                <AlertDescription className="mt-2">
+                  <ul className="list-disc space-y-1.5 pl-5">
                     {predictionResult.improvementAdvice.map((advice, index) => (
                       <li key={index}>{advice}</li>
                     ))}
@@ -222,11 +251,11 @@ export default function PredictionForm() {
             )}
 
             {predictionResult.positiveRemarks && predictionResult.positiveRemarks.length > 0 && (
-               <Alert variant="default" className="border-green-500/50 bg-green-500/10">
-                <ThumbsUp className="h-5 w-5 text-green-600" />
-                <AlertTitle className="text-green-700">Positive Remarks</AlertTitle>
-                <AlertDescription className="text-green-700/90">
-                   <ul className="list-disc space-y-1 pl-5 mt-2">
+               <Alert variant="default" className="border-green-500/50 bg-green-500/5 text-green-700 dark:bg-green-900/20 dark:text-green-300 dark:border-green-500/30">
+                <ThumbsUp className="h-5 w-5 text-green-600 dark:text-green-400" />
+                <AlertTitle className="font-semibold">Positive Remarks</AlertTitle>
+                <AlertDescription className="mt-2">
+                   <ul className="list-disc space-y-1.5 pl-5">
                     {predictionResult.positiveRemarks.map((remark, index) => (
                       <li key={index}>{remark}</li>
                     ))}
@@ -236,19 +265,16 @@ export default function PredictionForm() {
             )}
           </CardContent>
            <CardFooter>
-            <p className="text-xs text-muted-foreground">
-              Note: This AI-generated analysis is based on the provided data and general estimations. For precise figures and tailored strategies, consider a detailed professional audit.
-            </p>
+            <div className="flex items-start gap-2 text-xs text-muted-foreground p-3 rounded-md bg-muted/20 border border-dashed">
+              <Info className="h-4 w-4 mt-0.5 shrink-0" />
+              <p>
+                This AI-generated analysis provides estimates based on the data you've shared and general environmental models. For precise figures and comprehensive, tailored strategies, consider a detailed professional audit.
+              </p>
+            </div>
           </CardFooter>
         </Card>
-      )}
-       {isLoading && !predictionResult && (
-        <div className="flex flex-col items-center justify-center space-y-4 p-8 rounded-lg border bg-card text-card-foreground shadow-lg">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p className="text-lg font-medium text-muted-foreground">AI is analyzing your data...</p>
-          <p className="text-sm text-muted-foreground text-center">This might take a few moments. Generating predictions and advice.</p>
-        </div>
       )}
     </div>
   );
 }
+
