@@ -1,3 +1,4 @@
+
 "use client";
 
 import type React from 'react';
@@ -36,7 +37,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Toaster } from '@/components/ui/toaster'; // Ensure Toaster is available if needed in placeholder
+// import { Toaster } from '@/components/ui/toaster'; // Toaster is in RootLayout
 import { Leaf } from 'lucide-react';
 
 interface NavItem {
@@ -68,6 +69,7 @@ const PageHeader = () => {
             size="icon"
             className="shrink-0" 
             onClick={toggleSidebar}
+            aria-label="Toggle Menu"
           >
             <PanelLeft className="h-5 w-5" />
             <span className="sr-only">Toggle Menu</span>
@@ -76,7 +78,7 @@ const PageHeader = () => {
       <h1 className="text-xl font-semibold text-foreground flex-1">{pageTitle}</h1>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="rounded-full">
+          <Button variant="ghost" size="icon" className="rounded-full" aria-label="User Account Menu">
             <Avatar className="h-8 w-8">
               <AvatarImage src="https://picsum.photos/100/100" alt="User Avatar" data-ai-hint="user avatar" />
               <AvatarFallback>JD</AvatarFallback>
@@ -125,7 +127,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
         </header>
         <div className="flex flex-1">
           {/* Simplified Sidebar placeholder (optional) */}
-          <aside className="hidden md:block w-16 lg:w-64 border-r bg-sidebar"></aside> {/* Adjust width as needed */}
+          <aside className="hidden md:block w-16 border-r bg-sidebar"></aside> {/* Adjust width as needed */}
           <main className="flex-1 overflow-y-auto p-6">
             {children}
           </main>
@@ -136,7 +138,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <SidebarProvider defaultOpen={true} collapsible="icon">
+    <SidebarProvider defaultOpen={false} collapsible="icon">
       <Sidebar collapsible="icon" variant="sidebar" side="left">
         <SidebarHeader className="border-b border-sidebar-border"> 
           <Link href="/dashboard" className="flex items-center gap-2 group-data-[collapsible=icon]/sidebar:justify-center">
@@ -191,3 +193,4 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default AppLayout;
+
