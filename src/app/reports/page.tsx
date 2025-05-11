@@ -1,8 +1,7 @@
 
 "use client";
 
-import type React from 'react';
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"; // Changed import type React to import React
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -16,7 +15,7 @@ import type { DateRange } from "react-day-picker";
 import { generateComprehensiveReport, type GenerateComprehensiveReportInput, type GenerateComprehensiveReportOutput } from '@/ai/flows/generate-comprehensive-report';
 import { useToast } from "@/hooks/use-toast";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip as RechartsTooltip, Legend as RechartsLegend } from 'recharts';
-import { ChartContainer, ChartTooltipContent, ChartLegendContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltipContent, ChartLegend as ChartLegendComponent } from '@/components/ui/chart'; // Renamed ChartLegend to ChartLegendComponent
 import type { ChartConfig } from '@/components/ui/chart';
 
 interface ReportEntry {
@@ -251,7 +250,7 @@ export default function ReportsPage() {
                           <Cell key={`cell-${index}`} fill={PIE_CHART_COLORS[index % PIE_CHART_COLORS.length]} />
                         ))}
                       </Pie>
-                      <ChartLegendContent nameKey="name" />
+                      <ChartLegendComponent content={<ChartLegendComponent nameKey="name" />} />
                     </PieChart>
                   </ResponsiveContainer>
                 </ChartContainer>
@@ -400,3 +399,6 @@ export default function ReportsPage() {
     </div>
   );
 }
+
+
+    
