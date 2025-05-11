@@ -3,8 +3,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { TrendingUp, TrendingDown, CloudDrizzle, Droplets, Zap, Leaf, Wind, Waves } from "lucide-react";
-import { BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Line, LineChart, Tooltip as RechartsTooltip, Bar, RadialBarChart, RadialBar, PolarAngleAxis } from "recharts";
+import { TrendingUp, TrendingDown, CloudDrizzle, Droplets, Zap, Leaf, Wind, Waves, Sun, Recycle, Building, Plane, PackageIcon } from "lucide-react";
+import { BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Line, LineChart, Tooltip as RechartsTooltip, Bar, RadialBarChart, RadialBar, PolarAngleAxis, PieChart, Pie, Cell } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import type { ChartConfig } from "@/components/ui/chart";
 
@@ -22,7 +22,9 @@ const kpiData = [
   { title: "Water Waste", value: "15,000", unit: "m³", change: "-10%", trend: "down" as const, icon: Droplets, color: "hsl(var(--chart-3))" },
   { title: "Electricity Usage", value: "300,000", unit: "kWh", change: "-3%", trend: "down" as const, icon: Zap, color: "hsl(var(--chart-4))" },
   { title: "Air Quality (AQI)", value: "42", unit: "AQI", change: "-2.0%", trend: "down" as const, icon: Wind, color: "hsl(var(--chart-5))" },
-  { title: "Water Quality (WQI)", value: "75", unit: "WQI", change: "+1.5%", trend: "up" as const, icon: Waves, color: "hsl(var(--chart-3))" }, // Reusing chart-3 color
+  { title: "Water Quality (WQI)", value: "75", unit: "WQI", change: "+1.5%", trend: "up" as const, icon: Waves, color: "hsl(var(--chart-3))" },
+  { title: "Renewable Energy", value: "65", unit: "% Mix", change: "+5%", trend: "up" as const, icon: Sun, color: "hsl(var(--chart-2))" }, // Using chart-2 (Orange)
+  { title: "Recycling Rate", value: "70", unit: "%", change: "+3%", trend: "up" as const, icon: Recycle, color: "hsl(var(--chart-1))" }, // Using chart-1 (Teal)
 ];
 
 const monthlyCarbonData = [
@@ -65,10 +67,13 @@ const utilityChartConfig = {
   },
 } satisfies ChartConfig;
 
-const aqiGaugeData = [{ name: "AQI", value: 42 }];
-const wqiGaugeData = [{ name: "WQI", value: 75 }];
+const aqiGaugeData = [{ name: "AQI", value: 42, fill: "var(--color-aqi)" }];
+const wqiGaugeData = [{ name: "WQI", value: 75, fill: "var(--color-wqi)" }];
+const renewableEnergyGaugeData = [{ name: "Renewable", value: 65, fill: "var(--color-renewable)" }];
+const recyclingRateGaugeData = [{ name: "Recycled", value: 70, fill: "var(--color-recycling)" }];
 
-const qualityGaugeChartConfig = {
+
+const sustainabilityGaugeChartConfig = {
   aqi: {
     label: "AQI",
     color: "hsl(var(--chart-5))", // Green-ish for good AQI
@@ -77,6 +82,26 @@ const qualityGaugeChartConfig = {
     label: "WQI",
     color: "hsl(var(--chart-3))", // Blue for water
   },
+  renewable: {
+    label: "Renewable Energy",
+    color: "hsl(var(--chart-2))", // Orange for sun/energy
+  },
+  recycling: {
+    label: "Recycling Rate",
+    color: "hsl(var(--chart-1))", // Teal for recycling
+  },
+} satisfies ChartConfig;
+
+const carbonSourceData = [
+  { name: "Operations", value: 500, fill: "var(--color-operations)", icon: Building }, // 40% of 1250
+  { name: "Travel & Logistics", value: 437.5, fill: "var(--color-travel)", icon: Plane }, // 35% of 1250
+  { name: "Materials & Supply Chain", value: 312.5, fill: "var(--color-materials)", icon: PackageIcon }, // 25% of 1250
+];
+
+const carbonSourceChartConfig = {
+  operations: { label: "Operations", color: "hsl(var(--chart-1))" },
+  travel: { label: "Travel & Logistics", color: "hsl(var(--chart-2))" },
+  materials: { label: "Materials & Supply Chain", color: "hsl(var(--chart-4))" }, // Using chart-4 for a different color
 } satisfies ChartConfig;
 
 
@@ -96,7 +121,7 @@ export default function DashboardPage() {
         </CardHeader>
       </Card>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {kpiData.map((kpi) => (
           <Card key={kpi.title} className="shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -108,7 +133,11 @@ export default function DashboardPage() {
               <p className="text-xs text-muted-foreground">
                 {kpi.unit}
               </p>
-              <div className={`text-xs mt-1 flex items-center ${kpi.trend === "down" ? "text-[hsl(var(--success))]" : kpi.trend === "up" && (kpi.title === "CO2 Emissions") ? "text-destructive" : "text-[hsl(var(--success))]" }`}>
+              <div className={`text-xs mt-1 flex items-center ${
+                kpi.trend === "down" && (kpi.title.includes("Footprint") || kpi.title.includes("Emissions") || kpi.title.includes("Waste") || kpi.title.includes("Usage") || kpi.title.includes("AQI")) ? "text-[hsl(var(--success))]" : 
+                kpi.trend === "up" && (kpi.title.includes("Footprint") || kpi.title.includes("Emissions")) ? "text-destructive" :
+                kpi.trend === "up" ? "text-[hsl(var(--success))]" : "text-destructive"
+              }`}>
                  {kpi.trend === "down" ? <TrendingDown className="h-4 w-4 mr-1" /> : <TrendingUp className="h-4 w-4 mr-1" />}
                 {kpi.change} vs last month
               </div>
@@ -117,10 +146,10 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Carbon Footprint & CO2 Emissions Overview</CardTitle>
+            <CardTitle>Carbon Footprint & CO2 Emissions</CardTitle>
             <CardDescription>Monthly trend for the last 6 months.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -147,7 +176,7 @@ export default function DashboardPage() {
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Utility Usage Overview</CardTitle>
-            <CardDescription>Monthly water waste and electricity usage for the last 6 months.</CardDescription>
+            <CardDescription>Monthly water waste and electricity usage.</CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer config={utilityChartConfig} className="h-[300px] w-full">
@@ -169,23 +198,25 @@ export default function DashboardPage() {
             </ChartContainer>
           </CardContent>
         </Card>
+      </div>
 
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Air Quality Index (AQI)</CardTitle>
-            <CardDescription>Nearby air quality. Lower is better (0-50 Good).</CardDescription>
+            <CardDescription>Nearby. Lower is better (0-50 Good).</CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center items-center">
-            <ChartContainer config={qualityGaugeChartConfig} className="h-[250px] w-[250px]">
+            <ChartContainer config={sustainabilityGaugeChartConfig} className="h-[250px] w-[250px]">
               <RadialBarChart
                 data={aqiGaugeData}
-                startAngle={180} // Start from the left
-                endAngle={0} // End at the right (top semi-circle)
+                startAngle={180}
+                endAngle={0}
                 innerRadius="60%"
                 outerRadius="100%"
                 barSize={35}
                 cx="50%"
-                cy="70%" // Adjust to make space for label below
+                cy="70%"
               >
                 <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
                 <RadialBar
@@ -211,10 +242,10 @@ export default function DashboardPage() {
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Water Quality Index (WQI)</CardTitle>
-            <CardDescription>Nearby water quality. Higher is better (0-100 scale).</CardDescription>
+            <CardDescription>Nearby. Higher is better (0-100).</CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center items-center">
-             <ChartContainer config={qualityGaugeChartConfig} className="h-[250px] w-[250px]">
+             <ChartContainer config={sustainabilityGaugeChartConfig} className="h-[250px] w-[250px]">
               <RadialBarChart
                 data={wqiGaugeData}
                 startAngle={180}
@@ -245,7 +276,134 @@ export default function DashboardPage() {
             </ChartContainer>
           </CardContent>
         </Card>
+
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle>Renewable Energy Mix</CardTitle>
+            <CardDescription>Percentage of energy from renewables.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center items-center">
+             <ChartContainer config={sustainabilityGaugeChartConfig} className="h-[250px] w-[250px]">
+              <RadialBarChart
+                data={renewableEnergyGaugeData}
+                startAngle={180}
+                endAngle={0}
+                innerRadius="60%"
+                outerRadius="100%"
+                barSize={35}
+                cx="50%"
+                cy="70%"
+              >
+                <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+                <RadialBar
+                  background={{ fill: 'hsl(var(--muted))' }}
+                  dataKey="value"
+                  name="renewable"
+                  angleAxisId={0}
+                  fill="var(--color-renewable)"
+                  cornerRadius={10}
+                />
+                <RechartsTooltip content={<ChartTooltipContent hideLabel indicator="line" nameKey="name" />} />
+                 <text x="50%" y="70%" textAnchor="middle" dominantBaseline="middle" className="fill-foreground text-4xl font-bold">
+                  {renewableEnergyGaugeData[0].value}%
+                </text>
+                <text x="50%" y="85%" textAnchor="middle" dominantBaseline="middle" className="fill-muted-foreground text-sm">
+                  Renewable
+                </text>
+              </RadialBarChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle>Waste Recycling Rate</CardTitle>
+            <CardDescription>Percentage of waste being recycled.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center items-center">
+             <ChartContainer config={sustainabilityGaugeChartConfig} className="h-[250px] w-[250px]">
+              <RadialBarChart
+                data={recyclingRateGaugeData}
+                startAngle={180}
+                endAngle={0}
+                innerRadius="60%"
+                outerRadius="100%"
+                barSize={35}
+                cx="50%"
+                cy="70%"
+              >
+                <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+                <RadialBar
+                  background={{ fill: 'hsl(var(--muted))' }}
+                  dataKey="value"
+                  name="recycling"
+                  angleAxisId={0}
+                  fill="var(--color-recycling)"
+                  cornerRadius={10}
+                />
+                <RechartsTooltip content={<ChartTooltipContent hideLabel indicator="line" nameKey="name" />} />
+                 <text x="50%" y="70%" textAnchor="middle" dominantBaseline="middle" className="fill-foreground text-4xl font-bold">
+                  {recyclingRateGaugeData[0].value}%
+                </text>
+                <text x="50%" y="85%" textAnchor="middle" dominantBaseline="middle" className="fill-muted-foreground text-sm">
+                  Recycled
+                </text>
+              </RadialBarChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
       </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+        <Card className="shadow-lg lg:col-span-1">
+            <CardHeader>
+                <CardTitle>Carbon Footprint Breakdown</CardTitle>
+                <CardDescription>Distribution of carbon footprint by source.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex items-center justify-center">
+                <ChartContainer config={carbonSourceChartConfig} className="h-[350px] w-full max-w-lg">
+                    <ResponsiveContainer width="100%" height={350}>
+                        <PieChart>
+                            <ChartTooltip content={<ChartTooltipContent nameKey="name" hideLabel />} />
+                            <Pie
+                                data={carbonSourceData}
+                                dataKey="value"
+                                nameKey="name"
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={120}
+                                labelLine={false}
+                                label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }) => {
+                                  const RADIAN = Math.PI / 180;
+                                  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+                                  const x = cx + (radius + 20) * Math.cos(-midAngle * RADIAN);
+                                  const y = cy + (radius + 20) * Math.sin(-midAngle * RADIAN);
+                                  const Icon = carbonSourceData[index].icon;
+                                  return (
+                                    <>
+                                    <text x={x} y={y - 5} fill="hsl(var(--foreground))" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="text-xs">
+                                      {`${name} (${(percent * 100).toFixed(0)}%)`}
+                                    </text>
+                                     {Icon && <foreignObject x={x- (x > cx ? 0 : 20) -8 } y={y + 5} width="16" height="16" >
+                                        <Icon className="w-4 h-4 text-muted-foreground" style={{color: carbonSourceData[index].fill}} />
+                                      </foreignObject>
+                                    }
+                                    </>
+                                  );
+                                }}
+                            >
+                                {carbonSourceData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                                ))}
+                            </Pie>
+                             <ChartLegend content={<ChartLegendContent nameKey="name" />} />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </ChartContainer>
+            </CardContent>
+        </Card>
+      </div>
+
     </div>
   );
 }

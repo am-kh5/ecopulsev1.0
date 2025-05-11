@@ -29,11 +29,19 @@ body {
     --border: 60 30% 80%; /* Beige border */
     --input: 0 0% 100%; /* White for input fields */
     --ring: 180 100% 35%; /* Slightly lighter Teal for focus rings */
-    --chart-1: 180 100% 30%; /* Teal variant */
-    --chart-2: 39 100% 55%; /* Orange variant */
-    --chart-3: 190 70% 40%; /* Another Teal/Blue variant */
-    --chart-4: 210 65% 50%; /* Blue variant */
-    --chart-5: 45 80% 60%; /* Yellow/Orange variant */
+    
+    /* Chart Colors */
+    --chart-1: 180 100% 30%; /* Teal variant - Used for Carbon Footprint, Recycling Rate */
+    --chart-2: 39 100% 55%;  /* Orange variant - Used for CO2 Emissions, Renewable Energy */
+    --chart-3: 190 70% 40%;  /* Another Teal/Blue variant - Used for Water Waste, WQI */
+    --chart-4: 210 65% 50%;  /* Blue variant - Used for Electricity Usage */
+    --chart-5: 120 60% 45%;  /* Green variant - Used for AQI (original was yellow/orange) */
+
+    /* Pie Chart specific colors (can reuse chart-X or define new ones) */
+    --chart-operations: hsl(var(--chart-1)); /* Teal */
+    --chart-travel: hsl(var(--chart-2)); /* Orange */
+    --chart-materials: hsl(var(--chart-4)); /* Blue */
+    
     --radius: 0.5rem;
 
     /* Sidebar specific theme variables */
@@ -69,11 +77,17 @@ body {
     --border: 20 10% 25%;
     --input: 20 10% 18%;
     --ring: 180 100% 45%; /* Brighter Teal for focus rings */
+
+    /* Dark Chart Colors */
     --chart-1: 180 100% 40%;
     --chart-2: 39 100% 60%;
     --chart-3: 190 70% 50%;
     --chart-4: 210 65% 60%;
-    --chart-5: 45 80% 65%;
+    --chart-5: 120 55% 50%; 
+
+    --chart-operations: hsl(var(--chart-1));
+    --chart-travel: hsl(var(--chart-2));
+    --chart-materials: hsl(var(--chart-4));
 
     /* Dark Sidebar specific theme variables */
     --sidebar-background: 180 70% 12%; /* Even Darker Teal */
