@@ -16,7 +16,6 @@ const CarbonFootprintPredictionInputSchema = z.object({
   travelDistance: z.number().describe('Monthly travel distance in kilometers.'),
   wasteGeneration: z.number().describe('Monthly waste generation in kilograms.'),
   companySize: z.number().describe('Number of employees in the company.'),
-  location: z.string().describe('Location of the company (e.g., city, country).'),
   currentRecyclingRate: z.number().optional().describe('Current recycling rate as a percentage (0-100). Sourced from dashboard data.'),
   currentRenewableEnergyMix: z.number().optional().describe('Current renewable energy mix as a percentage (0-100). Sourced from dashboard data.'),
 });
@@ -42,9 +41,9 @@ const carbonFootprintPredictionPrompt = ai.definePrompt({
   prompt: `You are an expert AI environmental consultant specializing in corporate carbon footprints.
 Based on the provided current monthly operational data and dashboard metrics for a company, you need to:
 1. Calculate the \`predictedMonthlyFootprint\` in tons of CO2 equivalent.
-2. Provide a \`footprintAssessment\` (e.g., "Very High", "High", "Moderate", "Low", "Very Low") for this monthly footprint. Consider the company size, location, and other provided metrics like current recycling rate and renewable energy mix to infer typical industry benchmarks (assume general office-based business or light manufacturing if not specified by location context).
+2. Provide a \`footprintAssessment\` (e.g., "Very High", "High", "Moderate", "Low", "Very Low") for this monthly footprint. Consider the company size and other provided metrics like current recycling rate and renewable energy mix to infer typical industry benchmarks (assume general office-based business or light manufacturing).
 3. Based on the assessment and all input values (including energy, travel, waste, recycling rate, renewable energy mix):
-    - If the assessment is 'Very High', 'High' or 'Moderate', or if specific inputs seem notably high/low for the company size/location context, provide 3-5 actionable \`improvementAdvice\` points. These should be specific and practical. Examples:
+    - If the assessment is 'Very High', 'High' or 'Moderate', or if specific inputs seem notably high/low for the company size context, provide 3-5 actionable \`improvementAdvice\` points. These should be specific and practical. Examples:
         - "Consider switching to LED lighting to reduce energy consumption by an estimated X%."
         - "Implement a remote work policy for X days a week to reduce travel emissions."
         - "Conduct a waste audit to identify key areas for reduction and recycling. Your current recycling rate is {{currentRecyclingRate}}%." (Mention if provided and relevant)
@@ -61,7 +60,6 @@ Company operational and dashboard data:
 - Monthly travel distance: {{{travelDistance}}} km
 - Monthly waste generation: {{{wasteGeneration}}} kg
 - Number of employees: {{{companySize}}}
-- Location: {{{location}}}
 {{#if currentRecyclingRate}}
 - Current Recycling Rate: {{{currentRecyclingRate}}}%
 {{/if}}

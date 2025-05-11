@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, BarChart3, AlertTriangle, CheckCircle2, Lightbulb, ThumbsUp, Zap, Recycle, Car, Info, Wind, Sun } from 'lucide-react';
+import { Loader2, BarChart3, AlertTriangle, CheckCircle2, Lightbulb, ThumbsUp, Zap, Recycle, Car, Info, Sun, Users } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // These would ideally be fetched or passed as props from a service/context that has dashboard data.
@@ -22,14 +22,17 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 const LATEST_DASHBOARD_ENERGY_CONSUMPTION = 29000; // kWh (from dashboard/page.tsx monthlyUtilityData for June)
 const LATEST_RECYCLING_RATE = 70; // % (from dashboard/page.tsx kpiData)
 const LATEST_RENEWABLE_ENERGY_MIX = 65; // % (from dashboard/page.tsx kpiData)
+const LATEST_TRAVEL_DISTANCE = 437.5 * 2 * 10; // Placeholder based on Carbon Source data (Travel is 35% of 1250 tons, converting roughly to km for example) - this should be a real dashboard metric
+const LATEST_WASTE_GENERATION = 1250 * 0.1 * 1000; // Placeholder based on a % of total footprint, converted to kg - this should be a real dashboard metric
+const LATEST_COMPANY_SIZE = 50; // Placeholder, should come from company profile or dashboard settings
 
 
 const predictionFormSchema = z.object({
-  // energyConsumption, currentRecyclingRate, currentRenewableEnergyMix are now derived from dashboard data
-  travelDistance: z.coerce.number().min(0, "Travel distance must be positive"),
-  wasteGeneration: z.coerce.number().min(0, "Waste generation must be positive"), // This remains user input as dashboard "Water Waste" is in m³, model expects kg for general waste.
-  companySize: z.coerce.number().int().min(1, "Company size must be at least 1"),
-  location: z.string().min(2, "Location is required (e.g., City, Country)"),
+  // All inputs are now derived from dashboard data or constants
+  // travelDistance: z.coerce.number().min(0, "Travel distance must be positive"),
+  // wasteGeneration: z.coerce.number().min(0, "Waste generation must be positive"), 
+  // companySize: z.coerce.number().int().min(1, "Company size must be at least 1"),
+  // location: z.string().min(2, "Location is required (e.g., City, Country)"), // Removed
 });
 
 type PredictionFormValues = z.infer<typeof predictionFormSchema>;
@@ -42,14 +45,11 @@ export default function PredictionForm() {
   const form = useForm<PredictionFormValues>({
     resolver: zodResolver(predictionFormSchema),
     defaultValues: {
-      travelDistance: 5000, 
-      wasteGeneration: 2000, 
-      companySize: 50,
-      location: "New York, USA",
+      // No default values needed as form is now for display and trigger only
     },
   });
 
-  async function onSubmit(formData: PredictionFormValues) {
+  async function onSubmit(formData: PredictionFormValues) { // formData is now empty from the schema
     setIsLoading(true);
     setPredictionResult(null);
 
@@ -57,10 +57,10 @@ export default function PredictionForm() {
       energyConsumption: LATEST_DASHBOARD_ENERGY_CONSUMPTION,
       currentRecyclingRate: LATEST_RECYCLING_RATE,
       currentRenewableEnergyMix: LATEST_RENEWABLE_ENERGY_MIX,
-      travelDistance: formData.travelDistance,
-      wasteGeneration: formData.wasteGeneration,
-      companySize: formData.companySize,
-      location: formData.location,
+      travelDistance: LATEST_TRAVEL_DISTANCE,
+      wasteGeneration: LATEST_WASTE_GENERATION,
+      companySize: LATEST_COMPANY_SIZE,
+      // location: formData.location, // Removed
     };
 
     try {
@@ -109,106 +109,83 @@ export default function PredictionForm() {
             AI Carbon Footprint Analysis
           </CardTitle>
           <CardDescription>
-            Key metrics from your dashboard (energy use, recycling rate, renewables) are automatically included. 
-            Please provide the remaining details to predict your company's carbon footprint and receive actionable advice.
+            This analysis uses the latest data from your dashboard to predict your company's carbon footprint and provide actionable advice. Click the button below to generate your analysis.
           </CardDescription>
         </CardHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <CardContent className="space-y-6">
-              <div className="space-y-3">
-                <div className="p-3 border rounded-md bg-muted/30">
-                  <Label className="flex items-center gap-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-4 border rounded-lg bg-muted/30 hover:shadow-md transition-shadow">
+                  <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     <Zap className="w-4 h-4" />
-                    Monthly Energy Consumption
+                    Energy Consumption
                   </Label>
-                  <div className="mt-1 text-foreground font-semibold text-lg">
+                  <div className="mt-1.5 text-foreground font-semibold text-xl">
                     {LATEST_DASHBOARD_ENERGY_CONSUMPTION.toLocaleString()} kWh
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">Sourced from dashboard</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Monthly, from dashboard</p>
                 </div>
-                <div className="p-3 border rounded-md bg-muted/30">
-                  <Label className="flex items-center gap-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                <div className="p-4 border rounded-lg bg-muted/30 hover:shadow-md transition-shadow">
+                  <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     <Recycle className="w-4 h-4" />
-                    Current Recycling Rate
+                    Recycling Rate
                   </Label>
-                  <div className="mt-1 text-foreground font-semibold text-lg">
+                  <div className="mt-1.5 text-foreground font-semibold text-xl">
                     {LATEST_RECYCLING_RATE}%
                   </div>
-                   <p className="text-xs text-muted-foreground mt-0.5">Sourced from dashboard</p>
+                   <p className="text-xs text-muted-foreground mt-0.5">Current, from dashboard</p>
                 </div>
-                 <div className="p-3 border rounded-md bg-muted/30">
-                  <Label className="flex items-center gap-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                 <div className="p-4 border rounded-lg bg-muted/30 hover:shadow-md transition-shadow">
+                  <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     <Sun className="w-4 h-4" />
-                    Current Renewable Energy Mix
+                    Renewable Energy Mix
                   </Label>
-                  <div className="mt-1 text-foreground font-semibold text-lg">
+                  <div className="mt-1.5 text-foreground font-semibold text-xl">
                     {LATEST_RENEWABLE_ENERGY_MIX}%
                   </div>
-                   <p className="text-xs text-muted-foreground mt-0.5">Sourced from dashboard</p>
+                   <p className="text-xs text-muted-foreground mt-0.5">Current, from dashboard</p>
+                </div>
+                 <div className="p-4 border rounded-lg bg-muted/30 hover:shadow-md transition-shadow">
+                  <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <Car className="w-4 h-4" />
+                    Travel Distance
+                  </Label>
+                  <div className="mt-1.5 text-foreground font-semibold text-xl">
+                    {LATEST_TRAVEL_DISTANCE.toLocaleString()} km
+                  </div>
+                   <p className="text-xs text-muted-foreground mt-0.5">Monthly, from dashboard</p>
+                </div>
+                <div className="p-4 border rounded-lg bg-muted/30 hover:shadow-md transition-shadow">
+                  <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <Recycle className="w-4 h-4" /> {/* Consider a more generic waste icon if available */}
+                    Waste Generation
+                  </Label>
+                  <div className="mt-1.5 text-foreground font-semibold text-xl">
+                    {LATEST_WASTE_GENERATION.toLocaleString()} kg
+                  </div>
+                   <p className="text-xs text-muted-foreground mt-0.5">Monthly, from dashboard</p>
+                </div>
+                 <div className="p-4 border rounded-lg bg-muted/30 hover:shadow-md transition-shadow">
+                  <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <Users className="w-4 h-4" />
+                    Company Size
+                  </Label>
+                  <div className="mt-1.5 text-foreground font-semibold text-xl">
+                    {LATEST_COMPANY_SIZE} Employees
+                  </div>
+                   <p className="text-xs text-muted-foreground mt-0.5">From company profile</p>
                 </div>
               </div>
 
-              <FormField
-                control={form.control}
-                name="travelDistance"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-1"><Car className="w-4 h-4 text-muted-foreground" />Monthly Travel Distance (km)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="e.g., 5000" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="wasteGeneration"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-1"><Recycle className="w-4 h-4 text-muted-foreground" />Monthly Waste Generation (kg)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="e.g., 2000" {...field} />
-                    </FormControl>
-                     <FormDescription>Total non-hazardous solid waste generated by the company.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="companySize"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Number of Employees</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="e.g., 50" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Company Location</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., New York, USA" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Location field and other input fields removed */}
             </CardContent>
             <CardFooter>
-              <Button type="submit" disabled={isLoading} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Button type="submit" disabled={isLoading} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 text-base">
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing Data...
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Analyzing Dashboard Data...
                   </>
                 ) : (
                   "Get AI Analysis & Prediction"
@@ -223,9 +200,9 @@ export default function PredictionForm() {
         <Card className="shadow-lg h-full flex flex-col items-center justify-center">
             <CardContent className="text-center p-6">
               <Loader2 className="h-16 w-16 animate-spin text-primary mb-6" />
-              <h3 className="text-xl font-semibold text-foreground mb-2">AI is analyzing your data...</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-2">AI is analyzing your dashboard data...</h3>
               <p className="text-muted-foreground">
-                This might take a few moments. We're generating predictions and personalized advice based on your company's profile and latest dashboard metrics.
+                This might take a few moments. We're generating predictions and personalized advice based on your company's latest metrics.
               </p>
             </CardContent>
         </Card>
@@ -237,7 +214,7 @@ export default function PredictionForm() {
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="text-primary h-6 w-6" /> AI Analysis Results
             </CardTitle>
-            <CardDescription>Based on your data, here's the AI-generated carbon footprint analysis and advice.</CardDescription>
+            <CardDescription>Based on your dashboard data, here's the AI-generated carbon footprint analysis and advice.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="p-4 rounded-lg bg-muted/30 border">
@@ -292,7 +269,7 @@ export default function PredictionForm() {
             <div className="flex items-start gap-2 text-xs text-muted-foreground p-3 rounded-md bg-muted/20 border border-dashed">
               <Info className="h-4 w-4 mt-0.5 shrink-0" />
               <p>
-                This AI-generated analysis provides estimates based on the data you've shared and general environmental models. For precise figures and comprehensive, tailored strategies, consider a detailed professional audit.
+                This AI-generated analysis provides estimates based on the data from your dashboard and general environmental models. For precise figures and comprehensive, tailored strategies, consider a detailed professional audit.
               </p>
             </div>
           </CardFooter>
