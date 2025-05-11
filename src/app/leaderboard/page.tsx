@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, ShieldCheck, Zap, Droplets, Recycle, Leaf, Award, Star, TrendingUp } from "lucide-react";
+import { Trophy, ShieldCheck, Zap, Droplets, Recycle, Leaf, Award, Star, TrendingUp, TrendingDown } from "lucide-react";
 
 interface LeaderboardEntry {
   rank: number;
@@ -266,3 +266,4 @@ export default function LeaderboardPage() {
     </div>
   );
 }
+
