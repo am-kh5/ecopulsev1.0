@@ -1,3 +1,5 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TrendingUp, TrendingDown, CloudDrizzle, Droplets, Zap, Leaf } from "lucide-react";
