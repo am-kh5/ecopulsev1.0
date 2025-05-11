@@ -1,4 +1,3 @@
-
 "use client";
 
 import type React from 'react';
@@ -59,16 +58,27 @@ const navItems: NavItem[] = [
 
 const PageHeader = () => {
   const pathname = usePathname();
-  const { toggleSidebar, isMobile, state: sidebarState, collapsible: sidebarCollapsibleOption } = useSidebar(); 
+  const sidebarContext = useSidebar(); 
+  
+  // Guard against null context if PageHeader could be rendered outside SidebarProvider
+  // Though in this setup, it's always inside SidebarInset which is within SidebarProvider when mounted
+  const { toggleSidebar, isMobile, state: sidebarState, collapsible: sidebarCollapsibleOption, isHovering } = sidebarContext || {
+    toggleSidebar: () => {},
+    isMobile: false,
+    state: 'expanded',
+    collapsible: 'icon',
+    isHovering: false,
+  };
+
   const currentNavItem = navItems.find(item => pathname.startsWith(item.href));
   const pageTitle = currentNavItem ? currentNavItem.label : pathname.startsWith('/settings') ? 'Settings' : "EcoTrack";
 
-  // Show toggle if mobile OR if sidebar is icon-collapsible and currently collapsed
-  const showMobileToggle = isMobile || (sidebarCollapsibleOption === 'icon' && sidebarState === 'collapsed');
+  // Show toggle if mobile OR if sidebar is icon-collapsible and currently collapsed (and not hovering to expand)
+  const showMobileToggle = isMobile || (sidebarCollapsibleOption === 'icon' && sidebarState === 'collapsed' && !isHovering);
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 px-4 shadow-sm backdrop-blur-sm sm:px-6">
-        {(isMobile || (sidebarCollapsibleOption === 'icon' && sidebarState === 'collapsed' && !useSidebar().isHovering)) && ( 
+        {(showMobileToggle || (isMobile && sidebarCollapsibleOption === 'offcanvas')) && ( 
           <Button
             variant="ghost"
             size="icon"
@@ -131,8 +141,8 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   if (!mounted) {
     // This block is rendered on the server and on the initial client render.
     // It MUST match the server output to avoid hydration errors.
-    // The classes for <aside> and the structure for the main content area
-    // are adjusted to match the server output reported in the hydration error.
+    // Use static Tailwind classes that correspond to the collapsed state.
+    // SIDEBAR_COLLAPSED_WIDTH_ICON is 3.5rem, which is w-14 in Tailwind.
     return (
       <div className="flex flex-col min-h-screen bg-background">
         <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6">
@@ -147,16 +157,8 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             </Avatar>
         </header>
         <div className="flex flex-1">
-          {/* Adjusted width from w-16 to w-12 (var(--sidebar-collapsed-width-icon) is 3.5rem = 56px, w-14.
-              However, the error log shows w-12 for the initial server render from a previous state of the component.
-              To fix hydration error strictly based on the provided log, it should match the previous w-12.
-              The component logic uses CSS vars now, which should be correct post-hydration.
-              The pre-hydration SSR must match what client expects initially.
-              The error log actually showed w-16 lg:w-64, then w-16, then w-12. This means the server has been rendering different things.
-              Let's stick to w-12 as it was the latest state that still caused hydration errors.
-          */}
-          <aside className="hidden md:block w-[var(--sidebar-collapsed-width-icon)] border-r bg-sidebar"></aside> {/* Using CSS var for consistency */}
-          <main className="flex-1 overflow-y-auto p-6 md:ml-[var(--sidebar-collapsed-width-icon)]"> {/* Initial margin matches collapsed state */}
+          <aside className="hidden md:block w-14 border-r bg-sidebar"></aside> {/* Static width for SSR/pre-hydration */}
+          <main className="flex-1 overflow-y-auto p-6 md:ml-14"> {/* Static margin for SSR/pre-hydration */}
             {children}
           </main>
         </div>
@@ -166,15 +168,14 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
   // This block is rendered on the client after useEffect sets mounted to true.
   return (
-    <SidebarProvider defaultOpen={false} collapsible="icon">
+    <SidebarProvider defaultOpen={false} collapsible="icon"> {/* Default to collapsed */}
       <Sidebar 
-        collapsible="icon" // Ensures icon mode is active
+        collapsible="icon" 
         variant="sidebar" 
         side="left"
-        // className applied directly on Sidebar for width transitions based on its internal state and context
       >
         <SidebarHeader> 
-          <Link href="/dashboard" className="flex items-center gap-2 group-data-[state=collapsed]/sidebar:justify-center">
+          <Link href="/dashboard" className="flex items-center gap-2"> {/* Removed group-data for direct control by Logo */}
             <Logo iconSize={28} textSize="text-2xl" />
           </Link>
         </SidebarHeader>
@@ -186,7 +187,6 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
                   <SidebarMenuButton
                     isActive={pathname.startsWith(item.href)}
                     tooltip={{ children: item.tooltip, className: "bg-popover text-popover-foreground shadow-md" }}
-                    className="justify-start" 
                     size="default" 
                   >
                     <item.icon className="h-5 w-5" />
@@ -204,7 +204,6 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
                     <SidebarMenuButton 
                         isActive={pathname.startsWith('/settings')}
                         tooltip={{ children: "Settings", className: "bg-popover text-popover-foreground shadow-md"}}
-                        className="justify-start"
                         size="default" 
                     >
                         <Settings className="h-5 w-5" />
@@ -215,7 +214,6 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
            </SidebarMenu>
         </SidebarFooter>
       </Sidebar>
-      {/* SidebarInset handles the main content area, its margin adjusts based on sidebar state */}
       <SidebarInset>
         <PageHeader />
         <main className="flex-1 overflow-y-auto p-6 bg-background">
