@@ -1,7 +1,7 @@
-
 "use client";
 
 import type React from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -36,6 +36,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Toaster } from '@/components/ui/toaster'; // Ensure Toaster is available if needed in placeholder
+import { Leaf } from 'lucide-react';
 
 interface NavItem {
   href: string;
@@ -99,6 +101,39 @@ const PageHeader = () => {
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    // Render a basic structure or null to avoid hydration mismatch for complex client-side logic
+    // This placeholder should be simple and not rely on client-side state like cookies or window size
+    return (
+      <div className="flex flex-col min-h-screen bg-background">
+        {/* Simplified Header (optional) */}
+        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6">
+          <div className="flex items-center gap-2">
+            <Leaf className="h-7 w-7 text-primary" />
+             <h1 className='font-bold text-2xl text-foreground'>EcoTrack</h1>
+          </div>
+          <div className="flex-1"></div> {/* Placeholder for title */}
+           <Avatar className="h-8 w-8">
+              <AvatarFallback>JD</AvatarFallback>
+            </Avatar>
+        </header>
+        <div className="flex flex-1">
+          {/* Simplified Sidebar placeholder (optional) */}
+          <aside className="hidden md:block w-16 lg:w-64 border-r bg-sidebar"></aside> {/* Adjust width as needed */}
+          <main className="flex-1 overflow-y-auto p-6">
+            {children}
+          </main>
+        </div>
+        {/* Toaster is already in RootLayout, so not strictly needed here unless specifically for AppLayout context */}
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider defaultOpen={true} collapsible="icon">
