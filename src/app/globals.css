@@ -3,78 +3,83 @@
 @tailwind utilities;
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
+    --background: 60 56% 91%; /* Light Beige */
+    --foreground: 20 10% 20%; /* Dark Gray for readability on beige */
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 20 10% 20%; /* Dark Gray */
+    --popover: 0 0% 100%; /* White */
+    --popover-foreground: 20 10% 20%; /* Dark Gray */
+    --primary: 180 100% 25.1%; /* Teal */
+    --primary-foreground: 0 0% 98%; /* White */
+    --secondary: 180 60% 85%; /* Lighter Teal */
+    --secondary-foreground: 180 100% 20%; /* Darker Teal */
+    --muted: 60 30% 85%; /* Muted Beige */
+    --muted-foreground: 60 10% 45%; /* Grayish text on muted */
+    --accent: 39 100% 50%; /* Orange */
+    --accent-foreground: 0 0% 0%; /* Black for contrast on Orange */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --border: 60 30% 80%; /* Beige border */
+    --input: 0 0% 100%; /* White for input fields */
+    --ring: 180 100% 35%; /* Slightly lighter Teal for focus rings */
+    --chart-1: 180 100% 30%; /* Teal variant */
+    --chart-2: 39 100% 55%; /* Orange variant */
+    --chart-3: 190 70% 40%; /* Another Teal/Blue variant */
+    --chart-4: 210 65% 50%; /* Blue variant */
+    --chart-5: 45 80% 60%; /* Yellow/Orange variant */
     --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Sidebar specific theme variables */
+    --sidebar-background: 180 80% 18%; /* Dark Teal */
+    --sidebar-foreground: 180 15% 85%; /* Light grayish teal for text */
+    --sidebar-primary: 39 100% 50%; /* Orange - for active/selected items (accent) */
+    --sidebar-primary-foreground: 0 0% 0%; /* Black - text on orange */
+    --sidebar-accent: 180 80% 22%; /* Lighter teal than bg for hover */
+    --sidebar-accent-foreground: 180 15% 95%; /* Brighter text for hover */
+    --sidebar-border: 180 80% 15%; /* Even darker teal for border */
+    --sidebar-ring: 39 100% 50%; /* Orange for focus ring in sidebar */
   }
+
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --background: 20 10% 10%; /* Dark Gray */
+    --foreground: 60 50% 90%; /* Light Beige/Gray for text */
+    --card: 20 10% 15%; /* Slightly lighter Dark Gray */
+    --card-foreground: 60 50% 90%;
+    --popover: 20 10% 12%;
+    --popover-foreground: 60 50% 90%;
+    --primary: 180 100% 35%; /* Brighter Teal for dark mode */
+    --primary-foreground: 0 0% 98%; /* White */
+    --secondary: 180 60% 25%; /* Darker Lighter Teal */
+    --secondary-foreground: 180 15% 85%;
+    --muted: 20 10% 20%;
+    --muted-foreground: 60 20% 65%;
+    --accent: 39 100% 55%; /* Brighter Orange for dark mode */
+    --accent-foreground: 0 0% 0%; /* Black */
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 20 10% 25%;
+    --input: 20 10% 18%;
+    --ring: 180 100% 45%; /* Brighter Teal for focus rings */
+    --chart-1: 180 100% 40%;
+    --chart-2: 39 100% 60%;
+    --chart-3: 190 70% 50%;
+    --chart-4: 210 65% 60%;
+    --chart-5: 45 80% 65%;
+
+    /* Dark Sidebar specific theme variables */
+    --sidebar-background: 180 70% 12%; /* Even Darker Teal */
+    --sidebar-foreground: 180 15% 75%; 
+    --sidebar-primary: 39 100% 55%; /* Brighter Orange */
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 180 70% 18%; 
+    --sidebar-accent-foreground: 180 15% 90%;
+    --sidebar-border: 180 70% 10%;
+    --sidebar-ring: 39 100% 55%;
   }
 }
 
@@ -84,5 +89,7 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
