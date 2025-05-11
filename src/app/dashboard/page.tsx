@@ -1,9 +1,10 @@
+
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { TrendingUp, TrendingDown, CloudDrizzle, Droplets, Zap, Leaf } from "lucide-react";
-import { BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Line, LineChart, Tooltip as RechartsTooltip, Bar } from "recharts";
+import { TrendingUp, TrendingDown, CloudDrizzle, Droplets, Zap, Leaf, Wind, Waves } from "lucide-react";
+import { BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Line, LineChart, Tooltip as RechartsTooltip, Bar, RadialBarChart, RadialBar, PolarAngleAxis } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import type { ChartConfig } from "@/components/ui/chart";
 
@@ -20,6 +21,8 @@ const kpiData = [
   { title: "CO2 Emissions", value: "800", unit: "tons CO2", change: "+2.1%", trend: "up" as const, icon: CloudDrizzle, color: "hsl(var(--chart-2))" },
   { title: "Water Waste", value: "15,000", unit: "m³", change: "-10%", trend: "down" as const, icon: Droplets, color: "hsl(var(--chart-3))" },
   { title: "Electricity Usage", value: "300,000", unit: "kWh", change: "-3%", trend: "down" as const, icon: Zap, color: "hsl(var(--chart-4))" },
+  { title: "Air Quality (AQI)", value: "42", unit: "AQI", change: "-2.0%", trend: "down" as const, icon: Wind, color: "hsl(var(--chart-5))" },
+  { title: "Water Quality (WQI)", value: "75", unit: "WQI", change: "+1.5%", trend: "up" as const, icon: Waves, color: "hsl(var(--chart-3))" }, // Reusing chart-3 color
 ];
 
 const monthlyCarbonData = [
@@ -62,6 +65,20 @@ const utilityChartConfig = {
   },
 } satisfies ChartConfig;
 
+const aqiGaugeData = [{ name: "AQI", value: 42 }];
+const wqiGaugeData = [{ name: "WQI", value: 75 }];
+
+const qualityGaugeChartConfig = {
+  aqi: {
+    label: "AQI",
+    color: "hsl(var(--chart-5))", // Green-ish for good AQI
+  },
+  wqi: {
+    label: "WQI",
+    color: "hsl(var(--chart-3))", // Blue for water
+  },
+} satisfies ChartConfig;
+
 
 export default function DashboardPage() {
   return (
@@ -79,7 +96,7 @@ export default function DashboardPage() {
         </CardHeader>
       </Card>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {kpiData.map((kpi) => (
           <Card key={kpi.title} className="shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -91,8 +108,8 @@ export default function DashboardPage() {
               <p className="text-xs text-muted-foreground">
                 {kpi.unit}
               </p>
-              <div className={`text-xs mt-1 flex items-center ${kpi.trend === "down" ? "text-[hsl(var(--success))]" : "text-destructive"}`}>
-                {kpi.trend === "down" ? <TrendingDown className="h-4 w-4 mr-1" /> : <TrendingUp className="h-4 w-4 mr-1" />}
+              <div className={`text-xs mt-1 flex items-center ${kpi.trend === "down" ? "text-[hsl(var(--success))]" : kpi.trend === "up" && (kpi.title === "CO2 Emissions") ? "text-destructive" : "text-[hsl(var(--success))]" }`}>
+                 {kpi.trend === "down" ? <TrendingDown className="h-4 w-4 mr-1" /> : <TrendingUp className="h-4 w-4 mr-1" />}
                 {kpi.change} vs last month
               </div>
             </CardContent>
@@ -100,7 +117,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Carbon Footprint & CO2 Emissions Overview</CardTitle>
@@ -152,7 +169,84 @@ export default function DashboardPage() {
             </ChartContainer>
           </CardContent>
         </Card>
+
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle>Air Quality Index (AQI)</CardTitle>
+            <CardDescription>Nearby air quality. Lower is better (0-50 Good).</CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center items-center">
+            <ChartContainer config={qualityGaugeChartConfig} className="h-[250px] w-[250px]">
+              <RadialBarChart
+                data={aqiGaugeData}
+                startAngle={180} // Start from the left
+                endAngle={0} // End at the right (top semi-circle)
+                innerRadius="60%"
+                outerRadius="100%"
+                barSize={35}
+                cx="50%"
+                cy="70%" // Adjust to make space for label below
+              >
+                <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+                <RadialBar
+                  background={{ fill: 'hsl(var(--muted))' }}
+                  dataKey="value"
+                  name="aqi"
+                  angleAxisId={0}
+                  fill="var(--color-aqi)"
+                  cornerRadius={10}
+                />
+                 <RechartsTooltip content={<ChartTooltipContent hideLabel indicator="line" nameKey="name" />} />
+                <text x="50%" y="70%" textAnchor="middle" dominantBaseline="middle" className="fill-foreground text-4xl font-bold">
+                  {aqiGaugeData[0].value}
+                </text>
+                <text x="50%" y="85%" textAnchor="middle" dominantBaseline="middle" className="fill-muted-foreground text-sm">
+                  AQI
+                </text>
+              </RadialBarChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle>Water Quality Index (WQI)</CardTitle>
+            <CardDescription>Nearby water quality. Higher is better (0-100 scale).</CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center items-center">
+             <ChartContainer config={qualityGaugeChartConfig} className="h-[250px] w-[250px]">
+              <RadialBarChart
+                data={wqiGaugeData}
+                startAngle={180}
+                endAngle={0}
+                innerRadius="60%"
+                outerRadius="100%"
+                barSize={35}
+                cx="50%"
+                cy="70%"
+              >
+                <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+                <RadialBar
+                  background={{ fill: 'hsl(var(--muted))' }}
+                  dataKey="value"
+                  name="wqi"
+                  angleAxisId={0}
+                  fill="var(--color-wqi)"
+                  cornerRadius={10}
+                />
+                <RechartsTooltip content={<ChartTooltipContent hideLabel indicator="line" nameKey="name" />} />
+                 <text x="50%" y="70%" textAnchor="middle" dominantBaseline="middle" className="fill-foreground text-4xl font-bold">
+                  {wqiGaugeData[0].value}
+                </text>
+                <text x="50%" y="85%" textAnchor="middle" dominantBaseline="middle" className="fill-muted-foreground text-sm">
+                  WQI
+                </text>
+              </RadialBarChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
 }
+
