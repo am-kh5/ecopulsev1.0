@@ -1,3 +1,4 @@
+
 // Comprehensive report generation flow
 'use server';
 /**
@@ -64,61 +65,62 @@ const generateComprehensiveReportPrompt = ai.definePrompt({
   name: 'generateComprehensiveReportPrompt',
   input: {schema: GenerateComprehensiveReportInputSchema},
   output: {schema: GenerateComprehensiveReportOutputSchema},
-  prompt: `You are an expert AI environmental consultant. Generate a comprehensive environmental impact report for {{companyName}} covering the period: {{reportingPeriod}}.
-Current operational data:
+  prompt: `You are an expert AI environmental consultant. Your task is to generate a comprehensive environmental impact report for {{companyName}} covering the period: {{reportingPeriod}}.
+Please use the following current operational data:
 - Monthly energy consumption: {{energyConsumption}} kWh
 - Monthly travel distance: {{travelDistance}} km
 - Monthly waste generation: {{wasteGeneration}} kg
 - Number of employees: {{companySize}}
 {{#if currentRecyclingRate~}}
-- Current Recycling Rate: {{currentRecyclingRate}}%
+- Current Recycling Rate: {{{currentRecyclingRate}}}%
 {{/if~}}
 {{#if currentRenewableEnergyMix~}}
-- Current Renewable Energy Mix: {{currentRenewableEnergyMix}}%
+- Current Renewable Energy Mix: {{{currentRenewableEnergyMix}}}%
 {{/if~}}
 
-Based on this data and general environmental knowledge:
+Based on this data and general environmental knowledge, please populate the following fields in the output schema:
 
 1.  **Report Meta:**
-    *   `reportTitle`: "Environmental Impact Report for {{companyName}}"
-    *   `generatedDate`: Current date in YYYY-MM-DD format.
-    *   `periodCovered`: Use "{{reportingPeriod}}".
+    *   \`reportTitle\`: Set this to "Environmental Impact Report for {{companyName}}".
+    *   \`generatedDate\`: Use the current date in YYYY-MM-DD format. (This is already handled in the flow, you can acknowledge it).
+    *   \`periodCovered\`: Use the provided "{{reportingPeriod}}".
 
-2.  **Executive Summary (`executiveSummary`):**
+2.  **Executive Summary (\`executiveSummary\`):**
     *   Provide a 3-4 sentence high-level overview of the company's environmental performance. Mention overall status (e.g., areas of concern, areas of strength).
 
-3.  **Key Metrics Trend Analysis (`keyMetricsTrendAnalysis`):**
-    *   For `carbonFootprint`, `energyConsumption`, `waterUsage`, and `wasteGeneration`:
+3.  **Key Metrics Trend Analysis (\`keyMetricsTrendAnalysis\`):**
+    *   For \`carbonFootprint\`, \`energyConsumption\`, \`waterUsage\`, and \`wasteGeneration\` fields:
         *   Provide a 2-3 sentence textual analysis for each.
         *   Discuss likely trends over the past 6 months. If current figures are high/low for the company size, infer that this has likely been a trend.
         *   Example for carbon footprint: "The company's current operational data suggests its carbon footprint is [high/moderate/low]. Over the past six months, this likely means [a consistent challenge/a recent improvement/steady performance] in managing emissions."
 
-4.  **Carbon Emission Breakdown (`carbonEmissionBreakdown`):** THIS IS THE MOST IMPORTANT SECTION.
-    *   `analysisText` (4-5 sentences):
+4.  **Carbon Emission Breakdown (\`carbonEmissionBreakdown\`):** THIS IS THE MOST IMPORTANT SECTION.
+    *   \`analysisText\` (4-5 sentences):
         *   Identify the primary sources of carbon emissions for the company based on the provided data (energy, travel, waste, and general operations based on company size).
         *   Clearly state the **main cause(s)** of emissions.
         *   Explain why these sources are significant for this company profile.
-    *   `sourceData` (array of 3-5 items for a pie chart):
+    *   \`sourceData\` (array of 3-5 items for a pie chart):
         *   Estimate the breakdown of the total carbon footprint by major sources. Example sources: 'Energy Consumption', 'Business Travel', 'Waste Disposal', 'General Operations'.
         *   For each source, provide:
-            *   `name`: Short, descriptive name.
-            *   `value`: Estimated annual carbon footprint contribution from this source in tons CO2e (you'll need to estimate this based on inputs; be illustrative).
-            *   `percentage`: Percentage contribution to the total. Ensure percentages roughly sum to 100%.
+            *   \`name\`: Short, descriptive name.
+            *   \`value\`: Estimated annual carbon footprint contribution from this source in tons CO2e (you'll need to estimate this based on inputs; be illustrative).
+            *   \`percentage\`: Percentage contribution to the total. Ensure percentages roughly sum to 100%.
         *   Focus on making this breakdown insightful. The 'value' can be an estimated annual figure derived from the monthly inputs. For example, if energy is high, it should have a high percentage and value.
 
-5.  **AI Insights and Recommendations (`aiInsightsAndRecommendations`):**
-    *   `currentAssessment`: Provide an assessment of the company's current overall carbon footprint (e.g., "High", "Moderate", "Low") based on the input metrics and company size.
-    *   `improvementAdvice` (2-4 points, optional): If the assessment is 'High' or 'Moderate', provide specific, actionable advice. Focus on the main emission sources identified.
-    *   `positiveRemarks` (1-3 points, optional): If the assessment is 'Low' or there are commendable inputs (e.g., high recycling rate, high renewable mix), provide positive remarks.
+5.  **AI Insights and Recommendations (\`aiInsightsAndRecommendations\`):**
+    *   \`currentAssessment\`: Provide an assessment of the company's current overall carbon footprint (e.g., "High", "Moderate", "Low") based on the input metrics and company size.
+    *   \`improvementAdvice\` (2-4 points, optional): If the assessment is 'High' or 'Moderate', provide specific, actionable advice. Focus on the main emission sources identified.
+    *   \`positiveRemarks\` (1-3 points, optional): If the assessment is 'Low' or there are commendable inputs (e.g., high recycling rate, high renewable mix), provide positive remarks.
 
-6.  **Future Outlook Projection (`futureOutlookProjection`):**
+6.  **Future Outlook Projection (\`futureOutlookProjection\`):**
     *   Provide a 2-3 sentence textual summary of a conceptual 6-month carbon footprint projection.
     *   If advice was given, suggest a potential slight decreasing trend if advice is implemented.
     *   If performance is already good, suggest a stable or slightly improving trend.
 
-Ensure all text is professional, concise, and directly addresses the company's situation based on the provided metrics. The `carbonEmissionBreakdown.sourceData` values should be realistic estimations based on the inputs.
+Ensure all text is professional, concise, and directly addresses the company's situation based on the provided metrics. The \`carbonEmissionBreakdown.sourceData\` values should be realistic estimations based on the inputs.
 Assume a standard office-based or light service industry profile for {{companyName}} unless inputs strongly suggest otherwise.
 The total implicit carbon footprint for the breakdown can be roughly estimated: (energyConsumption * 0.0005 + travelDistance * 0.0002 + wasteGeneration * 0.001) * 12 for an annual estimate in tons, then distribute this among sources. This is a rough guide, use your expert judgment for plausible values and percentages in the breakdown.
+Strictly adhere to the output schema and its field descriptions.
 `,
 });
 
@@ -133,9 +135,16 @@ const generateComprehensiveReportFlow = ai.defineFlow(
     // Add current date for generatedDate
     const fullInput = {
       ...input,
-      generatedDate: new Date().toISOString().split('T')[0],
+      // generatedDate is already part of the output schema and will be set by the LLM based on prompt instructions.
+      // However, if we want to *force* it, we can add it here. Let's assume the LLM will handle it.
     };
     const {output} = await generateComprehensiveReportPrompt(fullInput);
+
+    // Ensure generatedDate is set, fallback if LLM misses it (though it shouldn't with clear instructions)
+    if (output && !output.generatedDate) {
+        output.generatedDate = new Date().toISOString().split('T')[0];
+    }
     return output!;
   }
 );
+
