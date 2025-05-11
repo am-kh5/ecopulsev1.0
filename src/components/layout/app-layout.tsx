@@ -28,6 +28,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import Logo from './logo';
+import EcoPulseIcon from '@/components/icons/ecopulse-icon'; // Import the new icon
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -39,7 +40,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
-import { Leaf } from 'lucide-react';
 
 
 interface NavItem {
@@ -71,7 +71,15 @@ const PageHeader = () => {
 
 
   const currentNavItem = navItems.find(item => pathname.startsWith(item.href));
-  const pageTitle = currentNavItem ? currentNavItem.label : pathname.startsWith('/settings') ? 'Settings' : "EcoPulse";
+  let pageTitle = "EcoPulse"; // Default title
+  if (pathname === '/') {
+    pageTitle = "Home";
+  } else if (currentNavItem) {
+    pageTitle = currentNavItem.label;
+  } else if (pathname.startsWith('/settings')) {
+    pageTitle = 'Settings';
+  }
+
 
   const showMobileToggle = isMobile || (sidebarCollapsibleOption === 'icon' && sidebarState === 'collapsed' && !isHovering);
 
@@ -144,9 +152,8 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
     return (
       <div className="flex flex-col min-h-screen bg-background">
         <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6">
-          {/* Simplified PageHeader content */}
           <div className="flex items-center gap-2"> {/* Simplified Logo */}
-            <Leaf className="h-7 w-7 text-primary" />
+            <EcoPulseIcon className="h-7 w-7 text-primary" /> {/* Updated icon */}
              <h1 className='font-bold text-2xl text-foreground'>EcoPulse</h1>
           </div>
           <div className="flex-1"></div> {/* Placeholder for title derived from page */}
