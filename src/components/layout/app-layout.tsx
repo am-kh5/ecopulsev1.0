@@ -1,3 +1,4 @@
+
 "use client";
 
 import type React from 'react';
@@ -22,7 +23,6 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarInset,
-  SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
 import Logo from './logo';
@@ -54,17 +54,17 @@ const navItems: NavItem[] = [
 
 const PageHeader = () => {
   const pathname = usePathname();
-  const { toggleSidebar, isMobile } = useSidebar();
+  const { toggleSidebar, isMobile, state: sidebarState } = useSidebar(); 
   const currentNavItem = navItems.find(item => pathname.startsWith(item.href));
-  const pageTitle = currentNavItem ? currentNavItem.label : "EcoTrack";
+  const pageTitle = currentNavItem ? currentNavItem.label : pathname.startsWith('/settings') ? 'Settings' : "EcoTrack";
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6">
-        {isMobile && (
+        {(isMobile || sidebarState === 'collapsed') && ( 
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="shrink-0" 
             onClick={toggleSidebar}
           >
             <PanelLeft className="h-5 w-5" />
@@ -84,7 +84,9 @@ const PageHeader = () => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Settings</DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/settings">Settings</Link>
+          </DropdownMenuItem>
           <DropdownMenuItem>Support</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem>Logout</DropdownMenuItem>
@@ -99,10 +101,10 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={true} collapsible="icon">
       <Sidebar collapsible="icon" variant="sidebar" side="left">
-        <SidebarHeader className="p-4 border-b border-sidebar-border">
-          <Link href="/dashboard" className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center">
+        <SidebarHeader className="border-b border-sidebar-border"> 
+          <Link href="/dashboard" className="flex items-center gap-2 group-data-[collapsible=icon]/sidebar:justify-center">
             <Logo iconSize={28} textSize="text-2xl" />
           </Link>
         </SidebarHeader>
@@ -114,7 +116,8 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
                   <SidebarMenuButton
                     isActive={pathname.startsWith(item.href)}
                     tooltip={{ children: item.tooltip, className: "bg-popover text-popover-foreground shadow-md" }}
-                    className="justify-start"
+                    className="justify-start" 
+                    size="default" 
                   >
                     <item.icon className="h-5 w-5" />
                     <span>{item.label}</span>
@@ -124,7 +127,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             ))}
           </SidebarMenu>
         </SidebarContent>
-        <SidebarFooter className="p-2 border-t border-sidebar-border">
+        <SidebarFooter className="border-t border-sidebar-border">  
            <SidebarMenu>
              <SidebarMenuItem>
                 <Link href="/settings" legacyBehavior passHref>
@@ -132,6 +135,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
                         isActive={pathname.startsWith('/settings')}
                         tooltip={{ children: "Settings", className: "bg-popover text-popover-foreground shadow-md"}}
                         className="justify-start"
+                        size="default" 
                     >
                         <Settings className="h-5 w-5" />
                         <span>Settings</span>
