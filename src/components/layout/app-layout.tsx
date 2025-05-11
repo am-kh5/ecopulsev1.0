@@ -1,4 +1,3 @@
-
 "use client";
 
 import type React from 'react';
@@ -56,13 +55,13 @@ const navItems: NavItem[] = [
 
 const PageHeader = () => {
   const pathname = usePathname();
-  const { toggleSidebar, isMobile, state: sidebarState } = useSidebar(); 
+  const { toggleSidebar, isMobile, state: sidebarState, collapsible } = useSidebar(); 
   const currentNavItem = navItems.find(item => pathname.startsWith(item.href));
   const pageTitle = currentNavItem ? currentNavItem.label : pathname.startsWith('/settings') ? 'Settings' : "EcoTrack";
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6">
-        {(isMobile || sidebarState === 'collapsed') && ( 
+        {(isMobile || (collapsible === 'icon' && sidebarState === 'collapsed')) && ( 
           <Button
             variant="ghost"
             size="icon"
@@ -109,11 +108,12 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   if (!mounted) {
-    // Render a basic structure or null to avoid hydration mismatch for complex client-side logic
-    // This placeholder should be simple and not rely on client-side state like cookies or window size
+    // This block is rendered on the server and on the initial client render.
+    // It MUST match the server output to avoid hydration errors.
+    // The classes for <aside> and the structure for the main content area
+    // are adjusted to match the server output reported in the hydration error.
     return (
       <div className="flex flex-col min-h-screen bg-background">
-        {/* Simplified Header (optional) */}
         <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6">
           <div className="flex items-center gap-2">
             <Leaf className="h-7 w-7 text-primary" />
@@ -125,21 +125,18 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             </Avatar>
         </header>
         <div className="flex flex-1">
-          {/* Simplified Sidebar placeholder (optional) */}
-          {/* Adjusted width from w-16 to w-12 to match initial collapsed state (3rem) */}
-          <aside className="hidden md:block w-12 border-r bg-sidebar"></aside>
-          <main className="flex-1 overflow-y-auto p-6">
-            {children}
-          </main>
+          <aside className="hidden md:block w-16 lg:w-64 border-r bg-sidebar"></aside> {/* Matches server output for aside from error log */}
+          {' '} {/* Matches server output for main content area from error log */}
         </div>
       </div>
     );
   }
 
+  // This block is rendered on the client after useEffect sets mounted to true.
   return (
     <SidebarProvider defaultOpen={false} collapsible="icon">
       <Sidebar collapsible="icon" variant="sidebar" side="left">
-        <SidebarHeader className="border-b border-sidebar-border"> 
+        <SidebarHeader> 
           <Link href="/dashboard" className="flex items-center gap-2 group-data-[collapsible=icon]/sidebar:justify-center">
             <Logo iconSize={28} textSize="text-2xl" />
           </Link>
@@ -163,7 +160,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             ))}
           </SidebarMenu>
         </SidebarContent>
-        <SidebarFooter className="border-t border-sidebar-border">  
+        <SidebarFooter>  
            <SidebarMenu>
              <SidebarMenuItem>
                 <Link href="/settings" legacyBehavior passHref>
