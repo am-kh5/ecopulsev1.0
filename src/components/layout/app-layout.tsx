@@ -1,3 +1,4 @@
+
 "use client";
 
 import type React from 'react';
@@ -60,20 +61,18 @@ const PageHeader = () => {
   const pathname = usePathname();
   const sidebarContext = useSidebar(); 
   
-  // Guard against null context if PageHeader could be rendered outside SidebarProvider
-  // Though in this setup, it's always inside SidebarInset which is within SidebarProvider when mounted
-  const { toggleSidebar, isMobile, state: sidebarState, collapsible: sidebarCollapsibleOption, isHovering } = sidebarContext || {
-    toggleSidebar: () => {},
-    isMobile: false,
-    state: 'expanded',
-    collapsible: 'icon',
-    isHovering: false,
-  };
+  const { 
+    toggleSidebar = () => {}, 
+    isMobile = false, 
+    state: sidebarState = 'collapsed', 
+    collapsible: sidebarCollapsibleOption = 'icon', 
+    isHovering = false 
+  } = sidebarContext || {};
+
 
   const currentNavItem = navItems.find(item => pathname.startsWith(item.href));
   const pageTitle = currentNavItem ? currentNavItem.label : pathname.startsWith('/settings') ? 'Settings' : "EcoTrack";
 
-  // Show toggle if mobile OR if sidebar is icon-collapsible and currently collapsed (and not hovering to expand)
   const showMobileToggle = isMobile || (sidebarCollapsibleOption === 'icon' && sidebarState === 'collapsed' && !isHovering);
 
   return (
@@ -141,8 +140,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   if (!mounted) {
     // This block is rendered on the server and on the initial client render.
     // It MUST match the server output to avoid hydration errors.
-    // Use static Tailwind classes that correspond to the collapsed state.
-    // SIDEBAR_COLLAPSED_WIDTH_ICON is 3.5rem, which is w-14 in Tailwind.
+    // The error log indicates server rendered w-12 for aside.
     return (
       <div className="flex flex-col min-h-screen bg-background">
         <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6">
@@ -157,8 +155,8 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             </Avatar>
         </header>
         <div className="flex flex-1">
-          <aside className="hidden md:block w-14 border-r bg-sidebar"></aside> {/* Static width for SSR/pre-hydration */}
-          <main className="flex-1 overflow-y-auto p-6 md:ml-14"> {/* Static margin for SSR/pre-hydration */}
+          <aside className="hidden md:block w-12 border-r bg-sidebar"></aside> {/* Static width for SSR/pre-hydration to match server log */}
+          <main className="flex-1 overflow-y-auto p-6 md:ml-12"> {/* Static margin for SSR/pre-hydration to match server log */}
             {children}
           </main>
         </div>
@@ -168,14 +166,14 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
   // This block is rendered on the client after useEffect sets mounted to true.
   return (
-    <SidebarProvider defaultOpen={false} collapsible="icon"> {/* Default to collapsed */}
+    <SidebarProvider defaultOpen={false} collapsible="icon"> 
       <Sidebar 
         collapsible="icon" 
         variant="sidebar" 
         side="left"
       >
         <SidebarHeader> 
-          <Link href="/dashboard" className="flex items-center gap-2"> {/* Removed group-data for direct control by Logo */}
+          <Link href="/dashboard" className="flex items-center gap-2 group-data-[collapsible=icon]/sidebar:justify-center">
             <Logo iconSize={28} textSize="text-2xl" />
           </Link>
         </SidebarHeader>
@@ -225,3 +223,5 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default AppLayout;
+
+    
