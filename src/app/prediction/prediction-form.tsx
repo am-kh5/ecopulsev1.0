@@ -14,9 +14,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, BarChart3, AlertTriangle, CheckCircle2, Lightbulb, ThumbsUp, Zap, Recycle, Car, Info, Sun, Users, TrendingUp as TrendingUpIcon, Wind } from 'lucide-react';
+import { Loader2, BarChart3, AlertTriangle, CheckCircle2, Lightbulb, ThumbsUp, Zap, Recycle, Car, Info, Sun, Users, TrendingUp as TrendingUpIcon } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Legend as RechartsLegend } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 import { ChartContainer, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import type { ChartConfig } from "@/components/ui/chart";
 
@@ -31,6 +31,15 @@ const predictionFormSchema = z.object({
 });
 
 type PredictionFormValues = z.infer<typeof predictionFormSchema>;
+
+const dashboardData = { // Mock data, replace with actual data fetching if needed
+  energyConsumption: 300000, 
+  travelDistance: 50000, 
+  wasteGeneration: 15000, 
+  companySize: 100,
+  currentRecyclingRate: 70,
+  currentRenewableEnergyMix: 65,
+};
 
 const futureProjectionChartConfig = {
   projectedFootprint: {
@@ -49,12 +58,12 @@ export default function PredictionForm() {
   const form = useForm<PredictionFormValues>({
     resolver: zodResolver(predictionFormSchema),
     defaultValues: {
-      energyConsumption: 29000, // from dashboard example
-      travelDistance: 8750, // from dashboard example
-      wasteGeneration: 125000, // from dashboard example
-      companySize: 50, // from dashboard example
-      currentRecyclingRate: 70, // from dashboard example
-      currentRenewableEnergyMix: 65, // from dashboard example
+      energyConsumption: dashboardData.energyConsumption,
+      travelDistance: dashboardData.travelDistance,
+      wasteGeneration: dashboardData.wasteGeneration,
+      companySize: dashboardData.companySize,
+      currentRecyclingRate: dashboardData.currentRecyclingRate,
+      currentRenewableEnergyMix: dashboardData.currentRenewableEnergyMix,
     },
   });
 
@@ -117,7 +126,7 @@ export default function PredictionForm() {
             AI Carbon Footprint Prediction
           </CardTitle>
           <CardDescription>
-            Enter your company's operational data below. Our AI will predict your carbon footprint, assess it, and provide actionable advice along with a 6-month projection.
+            Enter your company&apos;s operational data below (pre-filled with example dashboard data). Our AI will predict your carbon footprint, assess it, and provide actionable advice along with a 6-month projection.
           </CardDescription>
         </CardHeader>
         <Form {...form}>
@@ -189,7 +198,7 @@ export default function PredictionForm() {
                       <FormControl>
                         <Input type="number" placeholder="e.g., 70" {...field} />
                       </FormControl>
-                      <FormDescription>Optional: Your company's current waste recycling rate.</FormDescription>
+                      <FormDescription>Optional: Your company&apos;s current waste recycling rate.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -227,12 +236,12 @@ export default function PredictionForm() {
       </Card>
 
       {isLoading && !predictionResult && (
-        <Card className="shadow-lg h-full flex flex-col items-center justify-center">
+        <Card className="shadow-lg h-full flex flex-col items-center justify-center md:col-span-1"> {/* Ensure it takes one column if form takes one */}
             <CardContent className="text-center p-6">
               <Loader2 className="h-16 w-16 animate-spin text-primary mb-6" />
               <h3 className="text-xl font-semibold text-foreground mb-2">AI is working its magic...</h3>
               <p className="text-muted-foreground">
-                This might take a few moments. We're generating predictions and personalized advice based on your inputs.
+                This might take a few moments. We&apos;re generating predictions and personalized advice based on your inputs.
               </p>
             </CardContent>
         </Card>
@@ -244,7 +253,7 @@ export default function PredictionForm() {
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="text-primary h-6 w-6" /> AI Analysis Results
             </CardTitle>
-            <CardDescription>Based on your inputs, here's the AI-generated carbon footprint analysis and advice.</CardDescription>
+            <CardDescription>Based on your inputs, here&apos;s the AI-generated carbon footprint analysis and advice.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -353,3 +362,4 @@ export default function PredictionForm() {
     </div>
   );
 }
+
