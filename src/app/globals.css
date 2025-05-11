@@ -24,6 +24,8 @@ body {
     --accent-foreground: 0 0% 0%; /* Black for contrast on Orange */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
+    --success: 145 63% 42%; /* Green */
+    --success-foreground: 0 0% 100%; /* White */
     --border: 60 30% 80%; /* Beige border */
     --input: 0 0% 100%; /* White for input fields */
     --ring: 180 100% 35%; /* Slightly lighter Teal for focus rings */
@@ -62,6 +64,8 @@ body {
     --accent-foreground: 0 0% 0%; /* Black */
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 98%;
+    --success: 145 63% 48%; /* Brighter Green for dark mode */
+    --success-foreground: 0 0% 100%; /* White */
     --border: 20 10% 25%;
     --input: 20 10% 18%;
     --ring: 180 100% 45%; /* Brighter Teal for focus rings */

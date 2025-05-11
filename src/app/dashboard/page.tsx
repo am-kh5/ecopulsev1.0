@@ -1,8 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { TrendingUp, CloudDrizzle, Droplets, Zap, Leaf } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Line, LineChart, Tooltip as RechartsTooltip } from "recharts";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { TrendingUp, TrendingDown, CloudDrizzle, Droplets, Zap, Leaf } from "lucide-react";
+import { BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Line, LineChart, Tooltip as RechartsTooltip } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import type { ChartConfig } from "@/components/ui/chart";
+
+const company = { 
+  name: "EcoCorp Inc.", 
+  slogan: "Pioneering sustainable solutions for a greener tomorrow.", 
+  avatarSrc: "https://picsum.photos/64/64?random=25", 
+  dataAiHint: "company logo",
+  avatarFallback: "EI" 
+};
 
 const kpiData = [
   { title: "Carbon Footprint", value: "1,250", unit: "tons CO2e", change: "-5.2%", trend: "down" as const, icon: Leaf, color: "hsl(var(--chart-1))" },
@@ -55,6 +64,19 @@ const utilityChartConfig = {
 export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-6">
+      <Card className="shadow-lg">
+        <CardHeader className="flex flex-row items-center gap-4">
+          <Avatar className="h-16 w-16">
+            <AvatarImage src={company.avatarSrc} alt={`${company.name} logo`} data-ai-hint={company.dataAiHint} />
+            <AvatarFallback>{company.avatarFallback}</AvatarFallback>
+          </Avatar>
+          <div>
+            <CardTitle className="text-2xl">Welcome, {company.name}!</CardTitle>
+            <CardDescription>{company.slogan}</CardDescription>
+          </div>
+        </CardHeader>
+      </Card>
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {kpiData.map((kpi) => (
           <Card key={kpi.title} className="shadow-lg">
@@ -67,8 +89,8 @@ export default function DashboardPage() {
               <p className="text-xs text-muted-foreground">
                 {kpi.unit}
               </p>
-              <div className={`text-xs mt-1 flex items-center ${kpi.trend === "down" ? "text-green-600" : "text-red-600"}`}>
-                {kpi.trend === "down" ? <TrendingUp className="h-4 w-4 mr-1 transform rotate-180 scale-y-[-1]" /> : <TrendingUp className="h-4 w-4 mr-1" />}
+              <div className={`text-xs mt-1 flex items-center ${kpi.trend === "down" ? "text-[hsl(var(--success))]" : "text-destructive"}`}>
+                {kpi.trend === "down" ? <TrendingDown className="h-4 w-4 mr-1" /> : <TrendingUp className="h-4 w-4 mr-1" />}
                 {kpi.change} vs last month
               </div>
             </CardContent>
