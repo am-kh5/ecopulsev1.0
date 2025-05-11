@@ -1,11 +1,15 @@
 
 "use client";
 
+import type React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, ShieldCheck, Zap, Droplets, Recycle, Leaf, Award, Star, TrendingUp, TrendingDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Trophy, ShieldCheck, Zap, Droplets, Recycle, Leaf, Award, Star, TrendingUp, TrendingDown, Lightbulb, Info } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface LeaderboardEntry {
   rank: number;
@@ -15,8 +19,12 @@ interface LeaderboardEntry {
   dataAiHint: string;
   avatarFallback: string;
   badges: { name: string; icon: React.ElementType; color: string; textColor: string; borderColor?: string }[];
-  lastMonthChange: number; // Positive for increase, negative for decrease in rank points
+  lastMonthChange: number;
+  improvementHighlights?: string[];
 }
+
+// Assume this is the currently logged-in user's company
+const currentUserCompany = "EcoCorp Inc.";
 
 const leaderboardData: LeaderboardEntry[] = [
   { 
@@ -31,6 +39,12 @@ const leaderboardData: LeaderboardEntry[] = [
         { name: "Top Reducer", icon: Leaf, color: "bg-green-500", textColor: "text-green-50" },
     ],
     lastMonthChange: 350,
+    improvementHighlights: [
+      "Upgraded to energy-efficient LED lighting across all facilities.",
+      "Implemented a carpooling program for employees, reducing travel emissions by 10%.",
+      "Partnered with local suppliers to shorten supply chain distances.",
+      "Achieved 90% waste diversion from landfills through enhanced recycling and composting."
+    ]
   },
   { 
     rank: 2, 
@@ -44,6 +58,11 @@ const leaderboardData: LeaderboardEntry[] = [
         { name: "Sustained Effort", icon: Star, color: "bg-indigo-500", textColor: "text-indigo-50" },
     ],
     lastMonthChange: 200,
+    improvementHighlights: [
+      "Invested in a state-of-the-art water recycling system, cutting water usage by 25%.",
+      "Transitioned 50% of their vehicle fleet to electric vehicles.",
+      "Launched an employee education program on sustainable practices at work and home."
+    ]
   },
   { 
     rank: 3, 
@@ -56,14 +75,19 @@ const leaderboardData: LeaderboardEntry[] = [
         { name: "Waste Warrior", icon: Recycle, color: "bg-purple-500", textColor: "text-purple-50" }
     ],
     lastMonthChange: 150,
+    improvementHighlights: [
+      "Redesigned product packaging to use 100% recycled materials and reduce overall material use by 30%.",
+      "Installed smart thermostats and building management systems to optimize energy consumption.",
+      "Increased renewable energy sourcing to 60% of total consumption."
+    ]
   },
   { 
     rank: 4, 
-    company: "Planet Protectors Co.", 
+    company: currentUserCompany, // Changed to EcoCorp Inc. for highlighting
     points: 4200, 
     avatar: "https://picsum.photos/40/40?random=13", 
     dataAiHint: "shield logo",
-    avatarFallback: "PP",
+    avatarFallback: "EC", // Updated fallback
     badges: [
         { name: "Energy Saver", icon: Zap, color: "bg-orange-500", textColor: "text-orange-50" }
     ],
@@ -77,7 +101,7 @@ const leaderboardData: LeaderboardEntry[] = [
     dataAiHint: "nature logo",
     avatarFallback: "RR",
     badges: [],
-    lastMonthChange: -20, // Example of points drop
+    lastMonthChange: -20, 
   },
   { 
     rank: 6, 
@@ -167,11 +191,18 @@ export default function LeaderboardPage() {
                 <TableHead className="text-right font-semibold text-foreground">Points</TableHead>
                 <TableHead className="text-center font-semibold text-foreground">Achievements</TableHead>
                 <TableHead className="text-center font-semibold text-foreground">Monthly Progress</TableHead>
+                <TableHead className="text-center font-semibold text-foreground">Eco-Insights</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {leaderboardData.map((entry) => (
-                <TableRow key={entry.rank} className="hover:bg-secondary transition-colors duration-150">
+                <TableRow 
+                  key={entry.rank} 
+                  className={cn(
+                    "hover:bg-secondary/60 transition-colors duration-150",
+                    entry.company === currentUserCompany && "bg-accent/10 border-l-4 border-accent shadow-md hover:bg-accent/20"
+                  )}
+                >
                   <TableCell className="font-bold text-center text-lg">
                     {entry.rank === 1 && <span className="text-yellow-500 flex items-center justify-center gap-1"><Trophy className="h-5 w-5" />{entry.rank}</span>}
                     {entry.rank === 2 && <span className="text-gray-400 flex items-center justify-center gap-1"><Award className="h-5 w-5" />{entry.rank}</span>}
@@ -184,12 +215,12 @@ export default function LeaderboardPage() {
                         <AvatarImage src={entry.avatar} alt={entry.company} data-ai-hint={entry.dataAiHint} />
                         <AvatarFallback className="font-semibold bg-primary/10 text-primary">{entry.avatarFallback}</AvatarFallback>
                       </Avatar>
-                      <span className="font-medium text-foreground hover:text-primary transition-colors cursor-pointer">{entry.company}</span>
+                      <span className={cn("font-medium text-foreground hover:text-primary transition-colors cursor-pointer", entry.company === currentUserCompany && "text-accent font-semibold")}>{entry.company}</span>
                     </div>
                   </TableCell>
                   <TableCell className="text-right font-semibold text-lg text-primary">{entry.points.toLocaleString()}</TableCell>
                   <TableCell className="text-center">
-                    <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                    <div className="flex items-center justify-center gap-1.5 flex-wrap max-w-[200px] mx-auto">
                       {entry.badges.length > 0 ? entry.badges.map(badge => (
                         <Badge 
                           key={badge.name} 
@@ -209,6 +240,38 @@ export default function LeaderboardPage() {
                        {entry.lastMonthChange >= 0 ? '+' : ''}{entry.lastMonthChange.toLocaleString()}
                      </div>
                   </TableCell>
+                  <TableCell className="text-center">
+                    {entry.rank <= 3 && entry.improvementHighlights && entry.improvementHighlights.length > 0 ? (
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" size="sm" className="text-xs h-8 bg-background hover:bg-muted">
+                            <Lightbulb className="mr-1.5 h-3.5 w-3.5 text-yellow-500" />
+                            Insights
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80 shadow-xl border-primary/50">
+                          <div className="grid gap-4">
+                            <div className="space-y-1">
+                              <h4 className="font-semibold leading-none text-primary flex items-center">
+                                <Lightbulb className="h-4 w-4 mr-2 text-yellow-500" />
+                                Key Improvements by {entry.company}
+                              </h4>
+                              <p className="text-xs text-muted-foreground">
+                                Learn from their successful strategies:
+                              </p>
+                            </div>
+                            <ul className="list-disc list-inside space-y-1.5 text-sm text-foreground">
+                              {entry.improvementHighlights.map((highlight, index) => (
+                                <li key={index}>{highlight}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -223,7 +286,8 @@ export default function LeaderboardPage() {
             Unlock Achievements & Climb the Ranks!
           </CardTitle>
           <CardDescription className="text-sm">
-            Your dedication to sustainability doesn't go unnoticed. Earn points and prestigious badges to showcase your commitment.
+            Your dedication to sustainability doesn't go unnoticed. Earn points and prestigious badges. 
+            <span className="text-primary font-medium"> Learn from top performers by checking their "Eco-Insights"!</span>
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 text-muted-foreground">
@@ -267,3 +331,5 @@ export default function LeaderboardPage() {
   );
 }
 
+
+    
