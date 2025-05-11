@@ -37,7 +37,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-// import { Toaster } from '@/components/ui/toaster'; // Toaster is in RootLayout
 import { Leaf } from 'lucide-react';
 
 interface NavItem {
@@ -127,12 +126,12 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
         </header>
         <div className="flex flex-1">
           {/* Simplified Sidebar placeholder (optional) */}
-          <aside className="hidden md:block w-16 border-r bg-sidebar"></aside> {/* Adjust width as needed */}
+          {/* Adjusted width from w-16 to w-12 to match initial collapsed state (3rem) */}
+          <aside className="hidden md:block w-12 border-r bg-sidebar"></aside>
           <main className="flex-1 overflow-y-auto p-6">
             {children}
           </main>
         </div>
-        {/* Toaster is already in RootLayout, so not strictly needed here unless specifically for AppLayout context */}
       </div>
     );
   }
@@ -193,4 +192,3 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default AppLayout;
-
