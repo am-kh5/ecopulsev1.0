@@ -33,4 +33,4 @@ Before you begin, ensure you have the following installed on your system:
 
 1.  **Clone the repository:**
 
-"# ecopulsev1.0" 
+this project was built with the help of several ai tools + some clever prompt engeneering , the project was initially built for a hackthon but the idea was so good we decided to continue working on it hoping that one day we might even end up deploying the app .
